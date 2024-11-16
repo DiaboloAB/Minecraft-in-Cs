@@ -9,12 +9,15 @@ public class Camera
     public Matrix View { get; private set; }
     public Matrix Projection { get; private set; }
     public Vector3 Position { get; private set; }
-    public Vector3 Direction { get; private set; }
+    public Vector3 Rotation { get; private set; }
+    
+    public float FieldOfView { get; private set; }
     
     public Camera(GraphicsDevice graphicsDevice)
     {
+        FieldOfView = 90f;
         Position = new Vector3(0, 50, 100);
-        Direction = Vector3.Forward;
+        Rotation = new Vector3(0, 0, 0);
         
         Console.WriteLine("Camera created at position " + Position);
         
@@ -24,14 +27,14 @@ public class Camera
 
     private void UpdateViewMatrix()
     {
-        Vector3 target = Position + Direction;
+        Vector3 target = Position + Vector3.Transform(Vector3.Forward, Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z));
         View = Matrix.CreateLookAt(Position, target, Vector3.Up);
     }
 
     private void UpdateProjectionMatrix(GraphicsDevice graphicsDevice)
     {
         Projection = Matrix.CreatePerspectiveFieldOfView(
-            MathHelper.ToRadians(45),
+            MathHelper.ToRadians(FieldOfView),
             graphicsDevice.Viewport.AspectRatio,
             0.1f,
             1000f
@@ -40,20 +43,22 @@ public class Camera
 
     public void Rotate(Vector3 rotation)
     {
-        Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z);
-        Direction = Vector3.Transform(Direction, rotationMatrix);
+        Rotation += rotation;
         
-        
+        Console.WriteLine("Camera rotated to " + Rotation);
         UpdateViewMatrix();
     }
     public void Move(Vector3 movement)
     {
-        Vector3 direction = Vector3.Normalize(Direction);
+        Vector3 dir = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z));
+        dir = Vector3.Normalize(dir);
         
-        Position -= direction * movement.Z;
-        Position -= Vector3.Cross(Vector3.Up, direction) * movement.X;
-        Position += Vector3.Up * movement.Y;
-        
+        Position += new Vector3(
+            dir.X * movement.Z + dir.Z * movement.X,
+            movement.Y,
+            dir.Z * movement.Z - dir.X * movement.X
+            );
+        //
         UpdateViewMatrix();
     }
     

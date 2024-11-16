@@ -1,2 +1,3 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Effects/InstancedEffect.fx","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Effects/InstancedEffect.xnb","EffectProcessor","CompiledEffectContent",1516,2024,0,3860341
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Effects/InstancedEffect.fx","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Effects/InstancedEffect.xnb","EffectProcessor","CompiledEffectContent",1465,2071,0,5433221
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/grass.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Grass.xnb","TextureProcessor","Texture2DContent",1330,12373,0,0693924

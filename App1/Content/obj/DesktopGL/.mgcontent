@@ -5,8 +5,10 @@
   <Config />
   <SourceFiles>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Effects/InstancedEffect.fx</File>
+    <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/grass.png</File>
   </SourceFiles>
   <DestFiles>
     <File xsi:nil="true" />
+    <File>Textures/Grass.png</File>
   </DestFiles>
 </SourceFileCollection>

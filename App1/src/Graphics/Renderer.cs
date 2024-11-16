@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Diagnostics;
@@ -10,6 +11,7 @@ namespace App1.Graphics;
 
 public class CubeRenderer
 {
+    Texture2D cubeTexture;
     private readonly GraphicsDevice graphicsDevice;
     private readonly Effect effect;
     private VertexBuffer vertexBuffer;
@@ -19,41 +21,41 @@ public class CubeRenderer
     private Matrix view;
     private Matrix projection;
     private InstanceData[] instances;
+
     
-    public struct VertexPositionColor
+    public struct VertexPositionTexture
     {
         public Vector3 Position;
-        public Color Color;
+        public Vector2 Texturecoordinate;
 
         public readonly static VertexDeclaration VertexDeclaration = new VertexDeclaration(
             new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
-            new VertexElement(12, VertexElementFormat.Color, VertexElementUsage.Color, 0)
+            new VertexElement(12, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0)
         );
 
-        public VertexPositionColor(Vector3 position, Color color)
+        public VertexPositionTexture(Vector3 position, Vector2 texturecoordinate)
         {
             Position = position;
-            Color = color;
+            Texturecoordinate = texturecoordinate;
         }
     }
     
     public struct InstanceData
     {
         public Matrix World;
-        public Color Color;
         
         public readonly static VertexDeclaration VertexDeclaration = new VertexDeclaration(
             new VertexElement(0, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 1),
             new VertexElement(16, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 2),
             new VertexElement(32, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 3),
-            new VertexElement(48, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 4),
-            new VertexElement(64, VertexElementFormat.Color, VertexElementUsage.Color, 1)
+            new VertexElement(48, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 4)
         );
     }
     
-    public CubeRenderer(GraphicsDevice graphicsDevice, Effect effect, Camera camera)
+    public CubeRenderer(GraphicsDevice graphicsDevice, Effect effect, Camera camera, Texture2D cubeTexture)
     {
         this.graphicsDevice = graphicsDevice;
+        this.cubeTexture = cubeTexture;
         this.effect = effect;
         
         UpdateViewProjection(camera);
@@ -68,10 +70,10 @@ public class CubeRenderer
     
     private void CreateBuffers()
     {
-        VertexPositionColor[] vertices = CreateVertices();
+        VertexPositionTexture[] vertices = CreateVertices();
         short[] indices = CreateIndices();
         
-        vertexBuffer = new VertexBuffer(graphicsDevice, VertexPositionColor.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
+        vertexBuffer = new VertexBuffer(graphicsDevice, VertexPositionTexture.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
         vertexBuffer.SetData(vertices);
         
         indexBuffer = new IndexBuffer(graphicsDevice, IndexElementSize.SixteenBits, indices.Length, BufferUsage.WriteOnly);
@@ -93,45 +95,45 @@ public class CubeRenderer
         };
     }
     
-    private VertexPositionColor[] CreateVertices()
+    private VertexPositionTexture[] CreateVertices()
     {
-        return new VertexPositionColor[]
+        return new VertexPositionTexture[]
         {
-            // Front face
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f,  0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f, -0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f,  0.5f), Color.White),
-        
-        // Back face
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f, -0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f,  0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f, -0.5f), Color.White),
-        
-        // Top face
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f,  0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f,  0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f,  0.5f), Color.White),
-        
-        // Bottom face
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f, 0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f, -0.5f, 0.5f), Color.White),
-        new VertexPositionColor(new Vector3( 0.5f, -0.5f,  -0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f,  -0.5f), Color.White),
-        
-        // Left face
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f,  0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3(-0.5f, -0.5f, -0.5f), Color.White),
-        
-        // Right face
-        new VertexPositionColor(new Vector3(0.5f,  0.5f,  0.5f), Color.White),
-        new VertexPositionColor(new Vector3(0.5f,  0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3(0.5f, -0.5f, -0.5f), Color.White),
-        new VertexPositionColor(new Vector3(0.5f, -0.5f,  0.5f), Color.White)
+        // Front face
+            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, 0.66f)),
+            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, 0.66f)),
+            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, 1.0f)),
+            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, 1.0f)),
+            
+            // Back face
+            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.25f, 0.0f)),
+            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.5f, 0.0f)),
+            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.5f, 0.33f)),
+            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.25f, 0.33f)),
+            
+            // Top face
+            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.25f, 0.33f)),
+            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.5f, 0.33f)),
+            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, 0.66f)),
+            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, 0.66f)),
+            
+            // // Bottom face
+            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, 0.66f)),
+            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, 0.66f)),
+            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.5f, 1.0f)),
+            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.25f, 1.0f)),
+            //
+            // // Left face
+            // new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.0f, 0.0f)),
+            // new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(1.0f, 0.0f)),
+            // new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(1.0f, 1.0f)),
+            // new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.0f, 1.0f)),
+            //
+            // // Right face
+            // new VertexPositionTexture(new Vector3(0.5f,  0.5f,  0.5f), new Vector2(0.0f, 0.0f)),
+            // new VertexPositionTexture(new Vector3(0.5f,  0.5f, -0.5f), new Vector2(1.0f, 0.0f)),
+            // new VertexPositionTexture(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(1.0f, 1.0f)),
+            // new VertexPositionTexture(new Vector3(0.5f, -0.5f,  0.5f), new Vector2(0.0f, 1.0f))
         };
     }
 
@@ -140,7 +142,6 @@ public class CubeRenderer
         instances = cubes.Select(cube => new InstanceData
         {
             World = Matrix.CreateTranslation(cube.Position) * Matrix.CreateScale(cube.Scale),
-            Color = cube.Color
         }).ToArray();
         
         instanceBuffer.SetData(instances);
@@ -150,7 +151,8 @@ public class CubeRenderer
     {
         effect.Parameters["View"].SetValue(view);
         effect.Parameters["Projection"].SetValue(projection);
-
+        effect.Parameters["Texture"].SetValue(cubeTexture);
+        
         graphicsDevice.SetVertexBuffers(
             new VertexBufferBinding(vertexBuffer, 0, 0),
             new VertexBufferBinding(instanceBuffer, 0, 1)

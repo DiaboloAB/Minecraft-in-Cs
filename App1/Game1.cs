@@ -10,8 +10,11 @@ namespace App1;
 
 public class Game1 : Game
 {
+    Texture2D texture;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
+    private Vector2 lastMousePosition;
+
 
     private CubeRenderer cubeRenderer;
     private Camera camera;
@@ -23,7 +26,7 @@ public class Game1 : Game
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible = true;
+        IsMouseVisible = false;
     }
 
     protected override void Initialize()
@@ -40,9 +43,14 @@ public class Game1 : Game
         {
             throw new ContentLoadException("Failed to load InstancedEffect. Make sure the .fx file is properly added to the Content project.", e);
         }
+        texture = content.Load<Texture2D>("Textures/Grass");
         
-        cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
-        
+        lastMousePosition = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+        Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
+        _graphics.PreferredBackBufferWidth = 1920;
+        _graphics.PreferredBackBufferHeight = 1080;
+        _graphics.ApplyChanges();
+        cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera, texture);
         CreateTestCubes();
         
         base.Initialize();
@@ -52,24 +60,6 @@ public class Game1 : Game
     {
         cubes = new List<CubeData>();
         Random random = new Random();
-        
-        // for (int i = 0; i < 1; i++)
-        // {
-        //     cubes.Add(new CubeData
-        //     {
-        //         Position = new Vector3(
-        //             random.Next(-50, 50),
-        //             random.Next(-50, 50),
-        //             random.Next(-50, 50)
-        //         ),
-        //         Color = new Color(
-        //             random.Next(0, 255),
-        //             random.Next(0, 255),
-        //             random.Next(0, 255)
-        //         )
-        //     });
-        //     Console.WriteLine($"Cube {i} created at {cubes[i].Position}");
-        // }
         
         cubes.Add(
             new CubeData
@@ -113,36 +103,31 @@ public class Game1 : Game
     private void HandleInput(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-        float moveSpeed = 10f;
+        float moveSpeed = 7f;
+        float rotationSpeed = 0.005f;
+        var mouseState = Mouse.GetState();
         
-        Vector3 rotation = new Vector3(0, 0, 0);
         Vector3 move = new Vector3(0, 0, 0);
-        
-        if (keyboardState.IsKeyDown(Keys.Up))
-            rotation.X += 0.01f;
-        if (keyboardState.IsKeyDown(Keys.Down))
-            rotation.X -= 0.01f;
-        if (keyboardState.IsKeyDown(Keys.Left))
-            rotation.Y += 0.01f;
-        if (keyboardState.IsKeyDown(Keys.Right))
-            rotation.Y -= 0.01f;
-        
-        camera.Rotate(rotation);
 
         if (keyboardState.IsKeyDown(Keys.Z))
-            move.Z -= moveSpeed;
-        if (keyboardState.IsKeyDown(Keys.S))
             move.Z += moveSpeed;
+        if (keyboardState.IsKeyDown(Keys.S))
+            move.Z -= moveSpeed;
         if (keyboardState.IsKeyDown(Keys.Q))
-            move.X -= moveSpeed;
-        if (keyboardState.IsKeyDown(Keys.D))
             move.X += moveSpeed;
+        if (keyboardState.IsKeyDown(Keys.D))
+            move.X -= moveSpeed;
         if (keyboardState.IsKeyDown(Keys.Space))
             move.Y += moveSpeed;
         if (keyboardState.IsKeyDown(Keys.LeftShift))
             move.Y -= moveSpeed;
         
         camera.Move(move);
+        
+        Vector2 mouseDelta = new Vector2(mouseState.X, mouseState.Y) - lastMousePosition;
+        camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0));
+
+        Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         
         cubeRenderer.UpdateViewProjection(camera);
         // Console.WriteLine($"Camera position: {camera.Position}");
@@ -151,9 +136,11 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-
+        _spriteBatch.Begin();
+        _spriteBatch.Draw(texture, new Vector2(0, 0), Color.White);
+        _spriteBatch.End();
+        
         cubeRenderer.Draw();
-
         base.Draw(gameTime);
     }
 }
