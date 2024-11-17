@@ -16,7 +16,7 @@ public class Camera
     public Camera(GraphicsDevice graphicsDevice)
     {
         FieldOfView = 90f;
-        Position = new Vector3(0, 50, 100);
+        Position = new Vector3(0, 5, 5);
         Rotation = new Vector3(0, 0, 0);
         
         Console.WriteLine("Camera created at position " + Position);

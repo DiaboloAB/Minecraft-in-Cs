@@ -61,23 +61,19 @@ public class Game1 : Game
         cubes = new List<CubeData>();
         Random random = new Random();
         
-        cubes.Add(
-            new CubeData
+        for (int i = 0; i < 10; i++)
+        {
+            for (int j = 0; j < 10; j++)
             {
-                Position = new Vector3(0, 0, 0),
-                Color = Color.Red,
-                Scale = new Vector3(30, 30, 30)
+                cubes.Add(
+                    new CubeData
+                    {
+                        Position = new Vector3(i, 0, j),
+                        Scale = new Vector3(1, 1, 1)
+                    }
+                );
             }
-        );
-        
-        cubes.Add(
-            new CubeData
-            {
-                Position = new Vector3(10, 0, 0),
-                Color = Color.Green,
-                Scale = new Vector3(2, 2, 2)
-            }
-        );
+        }
         
         cubeRenderer.UpdateInstances(cubes);
     }
@@ -104,7 +100,7 @@ public class Game1 : Game
     {
         var keyboardState = Keyboard.GetState();
         float moveSpeed = 7f;
-        float rotationSpeed = 0.005f;
+        float rotationSpeed = 0.1f;
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
@@ -122,10 +118,10 @@ public class Game1 : Game
         if (keyboardState.IsKeyDown(Keys.LeftShift))
             move.Y -= moveSpeed;
         
-        camera.Move(move);
+        camera.Move(move * (float)gameTime.ElapsedGameTime.TotalSeconds);
         
         Vector2 mouseDelta = new Vector2(mouseState.X, mouseState.Y) - lastMousePosition;
-        camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0));
+        camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0) * (float)gameTime.ElapsedGameTime.TotalSeconds);
 
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         
@@ -137,7 +133,7 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
-        _spriteBatch.Draw(texture, new Vector2(0, 0), Color.White);
+        _spriteBatch.Draw(texture, new Rectangle(0, 0, 400, 300), Color.White);
         _spriteBatch.End();
         
         cubeRenderer.Draw();
