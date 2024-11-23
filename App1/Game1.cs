@@ -11,6 +11,7 @@ namespace App1;
 public class Game1 : Game
 {
     Texture2D texture;
+    Texture2D texture2;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Vector2 lastMousePosition;
@@ -33,6 +34,8 @@ public class Game1 : Game
     {
         camera = new Camera(GraphicsDevice);
 
+        BlockModel model = BlockModel.LoadModel(content, "Chest");
+        model.PrintModel();
         Effect effect;
         try
         {
@@ -44,13 +47,14 @@ public class Game1 : Game
             throw new ContentLoadException("Failed to load InstancedEffect. Make sure the .fx file is properly added to the Content project.", e);
         }
         texture = content.Load<Texture2D>("Textures/Grass");
+        texture2 = content.Load<Texture2D>("Textures/Stone");
         
         lastMousePosition = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
         _graphics.ApplyChanges();
-        cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera, texture);
+        cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
         CreateTestCubes();
         
         base.Initialize();
@@ -69,7 +73,8 @@ public class Game1 : Game
                     new CubeData
                     {
                         Position = new Vector3(i, 0, j),
-                        Scale = new Vector3(1, 1, 1)
+                        Scale = new Vector3(1, 1, 1),
+                        Texture = random.Next(0, 2) == 0 ? texture : texture2
                     }
                 );
             }

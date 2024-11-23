@@ -26,3 +26,6 @@ C:\Users\alexi\RiderProjects\App1\App1\obj\Debug\net6.0\ref\App1.dll
 C:\Users\alexi\RiderProjects\App1\App1\bin\Debug\net6.0\Content\Effects\InstancedEffect.xnb
 C:\Users\alexi\RiderProjects\App1\App1\obj\Debug\net6.0\App1.sourcelink.json
 C:\Users\alexi\RiderProjects\App1\App1\bin\Debug\net6.0\Content\Textures\grass.xnb
+C:\Users\alexi\RiderProjects\App1\App1\bin\Debug\net6.0\Content\Textures\Chest.xnb
+C:\Users\alexi\RiderProjects\App1\App1\bin\Debug\net6.0\Content\Chest.json
+C:\Users\alexi\RiderProjects\App1\App1\bin\Debug\net6.0\Content\Textures\Stone.xnb

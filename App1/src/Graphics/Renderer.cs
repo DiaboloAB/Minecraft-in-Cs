@@ -20,25 +20,10 @@ public class CubeRenderer
 
     private Matrix view;
     private Matrix projection;
-    private InstanceData[] instances;
-
+    private Dictionary<Texture2D, (InstanceData[] instances, int count)> texturedInstances;
     
-    public struct VertexPositionTexture
-    {
-        public Vector3 Position;
-        public Vector2 Texturecoordinate;
-
-        public readonly static VertexDeclaration VertexDeclaration = new VertexDeclaration(
-            new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0),
-            new VertexElement(12, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0)
-        );
-
-        public VertexPositionTexture(Vector3 position, Vector2 texturecoordinate)
-        {
-            Position = position;
-            Texturecoordinate = texturecoordinate;
-        }
-    }
+    private InstanceData[] instances;
+    private BlockModel chestModel;
     
     public struct InstanceData
     {
@@ -52,14 +37,14 @@ public class CubeRenderer
         );
     }
     
-    public CubeRenderer(GraphicsDevice graphicsDevice, Effect effect, Camera camera, Texture2D cubeTexture)
+    public CubeRenderer(GraphicsDevice graphicsDevice, Effect effect, Camera camera, int maxInstancesPerBatch = 1000)
     {
         this.graphicsDevice = graphicsDevice;
-        this.cubeTexture = cubeTexture;
+        this.texturedInstances = new Dictionary<Texture2D, (InstanceData[] instances, int count)>();
         this.effect = effect;
         
         UpdateViewProjection(camera);
-        CreateBuffers();
+        CreateBuffers(maxInstancesPerBatch);
     }
 
     public void UpdateViewProjection(Camera camera)
@@ -68,9 +53,9 @@ public class CubeRenderer
         projection = camera.Projection;
     }
     
-    private void CreateBuffers()
+    private void CreateBuffers(int maxInstancesPerBatch)
     {
-        VertexPositionTexture[] vertices = CreateVertices();
+        VertexPositionTexture[] vertices = Cube.CreateVertices();
         short[] indices = CreateIndices();
         
         vertexBuffer = new VertexBuffer(graphicsDevice, VertexPositionTexture.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
@@ -79,7 +64,7 @@ public class CubeRenderer
         indexBuffer = new IndexBuffer(graphicsDevice, IndexElementSize.SixteenBits, indices.Length, BufferUsage.WriteOnly);
         indexBuffer.SetData(indices);
         
-        instanceBuffer = new VertexBuffer(graphicsDevice, InstanceData.VertexDeclaration, 1000, BufferUsage.WriteOnly);
+        instanceBuffer = new VertexBuffer(graphicsDevice, InstanceData.VertexDeclaration, maxInstancesPerBatch, BufferUsage.WriteOnly);
     }
     
     private short[] CreateIndices()
@@ -94,58 +79,28 @@ public class CubeRenderer
             20, 21, 22, 20, 22, 23 // Right
         };
     }
-    
-    private VertexPositionTexture[] CreateVertices()
-    {
-        float third = 1.0f / 3.0f;
-        return new VertexPositionTexture[]
-        {
-            // Front face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
-            
-            // Back face
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1.0f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.75f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.75f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(1.0f, third)),
-            //
-            // // Top face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.25f, 0.0f)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.5f, 0.0f)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
-            //
-            // // Bottom face
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.5f, third * 3)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.25f, third * 3)),
-            // //
-            // // Left face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.0f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.0f, third * 2)),
-            //
-            // Right face
-            new VertexPositionTexture(new Vector3(0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3(0.5f,  0.5f, -0.5f), new Vector2(0.75f, third)),
-            new VertexPositionTexture(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(0.75f, third * 2)),
-            new VertexPositionTexture(new Vector3(0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2))
-        };
-    }
 
     public void UpdateInstances(IEnumerable<CubeData> cubes)
     {
-        instances = cubes.Select(cube => new InstanceData
+        texturedInstances.Clear();
+
+        foreach (var cube in cubes)
         {
-            World = Matrix.CreateTranslation(cube.Position) * Matrix.CreateScale(cube.Scale),
-        }).ToArray();
-        
-        instanceBuffer.SetData(instances);
+            if (!texturedInstances.ContainsKey(cube.Texture))
+            {
+                texturedInstances[cube.Texture] = (new InstanceData[1000], 0);
+            }
+            var textureBatch = texturedInstances[cube.Texture];
+            ref var instances = ref textureBatch.instances;
+            ref var count = ref textureBatch.count;
+
+            instances[count++] = new InstanceData
+            {
+                World = Matrix.CreateTranslation(cube.Position) * Matrix.CreateScale(cube.Scale)
+            };
+
+            texturedInstances[cube.Texture] = (instances, count);
+        }
     }
 
     public void Draw()
@@ -154,18 +109,31 @@ public class CubeRenderer
         
         effect.Parameters["View"].SetValue(view);
         effect.Parameters["Projection"].SetValue(projection);
-        effect.Parameters["Texture"].SetValue(cubeTexture);
         
-        graphicsDevice.SetVertexBuffers(
-            new VertexBufferBinding(vertexBuffer, 0, 0),
-            new VertexBufferBinding(instanceBuffer, 0, 1)
-        );
+        graphicsDevice.SetVertexBuffer(vertexBuffer);
         graphicsDevice.Indices = indexBuffer;
-
-        foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+        
+        foreach (var textureBatch in texturedInstances)
         {
-            pass.Apply();
-            graphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 24, 0, 12, instances.Length);
+            var texture = textureBatch.Key;
+            var (instances, instanceCount) = textureBatch.Value;
+            
+            if (instanceCount == 0) continue;
+            
+            effect.Parameters["Texture"].SetValue(texture);
+            
+            instanceBuffer.SetData(instances, 0, instanceCount);
+            
+            instanceBuffer.SetData(instances);
+            graphicsDevice.SetVertexBuffers(
+                    new VertexBufferBinding(vertexBuffer, 0, 0),
+                    new VertexBufferBinding(instanceBuffer, 0, 1)
+                    );
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                graphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 24, 0, 12, instanceCount);
+            }
         }
     }
 }

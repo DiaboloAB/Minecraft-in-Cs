@@ -45,7 +45,6 @@ public class Camera
     {
         Rotation += rotation;
         
-        Console.WriteLine("Camera rotated to " + Rotation);
         UpdateViewMatrix();
     }
     public void Move(Vector3 movement)
