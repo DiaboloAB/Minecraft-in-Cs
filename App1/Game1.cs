@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using App1.Core.World;
 using App1.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -10,16 +11,22 @@ namespace App1;
 
 public class Game1 : Game
 {
-    Texture2D texture;
-    Texture2D texture2;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Vector2 lastMousePosition;
-
-
-    private CubeRenderer cubeRenderer;
-    private Camera camera;
+    
+    Texture2D texture;
+    Texture2D texture2;
     private List<CubeData> cubes;
+    
+    private CubeRenderer cubeRenderer;
+    
+    
+    private Camera camera;
+    private ChunkMeshBuilder chunkMeshBuilder;
+    private Chunk[] chunks;
+    
+    private double fps = 0;
     
     ContentManager content => Content;
 
@@ -53,6 +60,7 @@ public class Game1 : Game
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
+        IsFixedTimeStep = false;
         _graphics.ApplyChanges();
         cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
         CreateTestCubes();
@@ -97,6 +105,8 @@ public class Game1 : Game
             Exit();
 
         HandleInput(gameTime);
+        
+        fps = 1 / gameTime.ElapsedGameTime.TotalSeconds;
 
         base.Update(gameTime);
     }
@@ -139,6 +149,7 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         _spriteBatch.Begin();
         _spriteBatch.Draw(texture, new Rectangle(0, 0, 400, 300), Color.White);
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
         _spriteBatch.End();
         
         cubeRenderer.Draw();
