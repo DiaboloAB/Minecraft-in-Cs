@@ -29,6 +29,8 @@ public class Game1 : Game
     private double fps = 0;
     
     ContentManager content => Content;
+    
+    Texture2D crosshair;
 
     public Game1()
     {
@@ -40,9 +42,7 @@ public class Game1 : Game
     protected override void Initialize()
     {
         camera = new Camera(GraphicsDevice);
-
-        BlockModel model = BlockModel.LoadModel(content, "Chest");
-        model.PrintModel();
+        
         Effect effect;
         try
         {
@@ -55,6 +55,7 @@ public class Game1 : Game
         }
         texture = content.Load<Texture2D>("Textures/Grass");
         texture2 = content.Load<Texture2D>("Textures/Stone");
+        chunks = new Chunk[1];
         
         lastMousePosition = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
@@ -64,8 +65,34 @@ public class Game1 : Game
         _graphics.ApplyChanges();
         cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
         CreateTestCubes();
+        CreateTestChests();
+        
+        crosshair = content.Load<Texture2D>("Textures/Crosshair");
         
         base.Initialize();
+    }
+
+    private void CreateTestChests()
+    {
+        BlockModel model = BlockModel.LoadModel(content, "Chest", GraphicsDevice);
+        model.PrintModel();
+        
+        Texture2D texture = content.Load<Texture2D>("Textures/Chest");
+        
+        cubes = new List<CubeData>();
+        
+        cubes.Add(
+            new CubeData
+            {
+                Position = new Vector3(0, 0, 0),
+                Scale = new Vector3(1, 1, 1),
+                Texture = texture
+            }
+        );
+
+        
+        cubeRenderer.UpdateComplexInstances(cubes, model);
+        
     }
     
     private void CreateTestCubes()
@@ -73,20 +100,47 @@ public class Game1 : Game
         cubes = new List<CubeData>();
         Random random = new Random();
         
-        for (int i = 0; i < 10; i++)
-        {
-            for (int j = 0; j < 10; j++)
+        // for (int i = 0; i < 10; i++)
+        // {
+        //     for (int j = 0; j < 10; j++)
+        //     {
+        //         cubes.Add(
+        //             new CubeData
+        //             {
+        //                 Position = new Vector3(i, 0, j),
+        //                 Scale = new Vector3(1, 1, 1),
+        //                 Texture = random.Next(0, 2) == 0 ? texture : texture2
+        //             }
+        //         );
+        //     }
+        // }
+        
+        cubes.Add(
+            new CubeData
             {
-                cubes.Add(
-                    new CubeData
-                    {
-                        Position = new Vector3(i, 0, j),
-                        Scale = new Vector3(1, 1, 1),
-                        Texture = random.Next(0, 2) == 0 ? texture : texture2
-                    }
-                );
+                Position = new Vector3(0, -2, 0),
+                Scale = new Vector3(1, 1, 1),
+                Texture = texture
             }
-        }
+        );
+        
+        cubes.Add(
+            new CubeData
+            {
+                Position = new Vector3(0, -1, 0),
+                Scale = new Vector3(1, 1, 1),
+                Texture = texture
+            }
+        );
+        
+        cubes.Add(
+            new CubeData
+            {
+                Position = new Vector3(1, 0, 0),
+                Scale = new Vector3(1, 1, 1),
+                Texture = texture
+            }
+        );
         
         cubeRenderer.UpdateInstances(cubes);
     }
@@ -115,7 +169,7 @@ public class Game1 : Game
     {
         var keyboardState = Keyboard.GetState();
         float moveSpeed = 7f;
-        float rotationSpeed = 0.1f;
+        float rotationSpeed = 0.25f;
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
@@ -136,23 +190,49 @@ public class Game1 : Game
         camera.Move(move * (float)gameTime.ElapsedGameTime.TotalSeconds);
         
         Vector2 mouseDelta = new Vector2(mouseState.X, mouseState.Y) - lastMousePosition;
-        camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0) * (float)gameTime.ElapsedGameTime.TotalSeconds);
+        if ( mouseDelta != Vector2.Zero)
+            camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0) * (float)gameTime.ElapsedGameTime.TotalSeconds);
 
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         
         cubeRenderer.UpdateViewProjection(camera);
-        // Console.WriteLine($"Camera position: {camera.Position}");
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        _spriteBatch.Begin();
-        _spriteBatch.Draw(texture, new Rectangle(0, 0, 400, 300), Color.White);
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
-        _spriteBatch.End();
+        
+        
+        foreach (var chunk in chunks)
+        {
+            // if (chunk.IsDirty)
+            // {
+            //     chunk.IsDirty = false;
+            //     // chunkMeshBuilder.BuildMeshes(chunk);
+            //     // cubeRenderer.UpdateInstances(chunkMeshBuilder.GetCubes());
+            // }
+        }
+        
         
         cubeRenderer.Draw();
+        
+        _spriteBatch.Begin();
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {camera.Facing}", new Vector2(10, 30), Color.White);
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) camera.Position.X}, {(int) camera.Position.Y}, {(int) camera.Position.Z}", new Vector2(10, 50), Color.White);
+        _spriteBatch.Draw(
+            crosshair, 
+            new Vector2(GraphicsDevice.Viewport.Width / 2 - crosshair.Width, GraphicsDevice.Viewport.Height / 2 - crosshair.Height), 
+            null, 
+            Color.White, 
+            0f, 
+            Vector2.Zero, 
+            2f, 
+            SpriteEffects.None, 
+            0f
+        );
+        _spriteBatch.End();
+        
         base.Draw(gameTime);
     }
 }

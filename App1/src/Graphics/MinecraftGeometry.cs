@@ -13,6 +13,13 @@ namespace MinecraftGeometry
     {
         [JsonPropertyName("bones")]
         public List<Bone> Bones { get; set; }
+        
+        [JsonPropertyName("texture_width")]
+        public int TextureWidth { get; set; }
+        
+        [JsonPropertyName("texture_height")]
+        public int TextureHeight { get; set; }
+        
     }
     
 

@@ -7,10 +7,12 @@
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Effects/InstancedEffect.fx</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Fonts/File.spritefont</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Chest.png</File>
+    <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Crosshair.png</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Grass.png</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Stone.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

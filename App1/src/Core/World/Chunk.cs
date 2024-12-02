@@ -7,7 +7,7 @@ public class Chunk
     public const int SIZE = 16;
     private readonly int [,,] blocks;
     private Vector3 position;
-    private bool isDirty;
+    public bool IsDirty = true;
     
     public Chunk(Vector3 position)
     {
@@ -15,14 +15,14 @@ public class Chunk
         blocks = new int[SIZE, SIZE, SIZE];
     }
     
-    public int getBlock(int x, int y, int z)
+    public int GetBlock(Vector3 pos)
     {
-        return blocks[x, y, z];
+        return blocks[(int)pos.X, (int)pos.Y, (int)pos.Z];
     }
     
-    public void setBlock(int x, int y, int z, int type)
+    public void SetBlock(int x, int y, int z, int type)
     {
         blocks[x, y, z] = type;
-        isDirty = true;
+        IsDirty = true;
     }
 }

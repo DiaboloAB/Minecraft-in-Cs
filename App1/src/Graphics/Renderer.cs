@@ -21,9 +21,7 @@ public class CubeRenderer
     private Matrix view;
     private Matrix projection;
     private Dictionary<Texture2D, (InstanceData[] instances, int count)> texturedInstances;
-    
-    private InstanceData[] instances;
-    private BlockModel chestModel;
+    private Dictionary<(Texture2D, BlockModel), (InstanceData[] instances, int count)> texturedComplexInstances;
     
     public struct InstanceData
     {
@@ -41,6 +39,7 @@ public class CubeRenderer
     {
         this.graphicsDevice = graphicsDevice;
         this.texturedInstances = new Dictionary<Texture2D, (InstanceData[] instances, int count)>();
+        this.texturedComplexInstances = new Dictionary<(Texture2D, BlockModel), (InstanceData[] instances, int count)>();
         this.effect = effect;
         
         UpdateViewProjection(camera);
@@ -56,28 +55,17 @@ public class CubeRenderer
     private void CreateBuffers(int maxInstancesPerBatch)
     {
         VertexPositionTexture[] vertices = Cube.CreateVertices();
-        short[] indices = CreateIndices();
+        short[] indices = Cube.CreateIndices();
+        Console.WriteLine($"Vertices: {vertices.Length}, Indices: {indices.Length}");
         
         vertexBuffer = new VertexBuffer(graphicsDevice, VertexPositionTexture.VertexDeclaration, vertices.Length, BufferUsage.WriteOnly);
         vertexBuffer.SetData(vertices);
+        Console.WriteLine("Vertex buffer created.");
         
         indexBuffer = new IndexBuffer(graphicsDevice, IndexElementSize.SixteenBits, indices.Length, BufferUsage.WriteOnly);
         indexBuffer.SetData(indices);
         
         instanceBuffer = new VertexBuffer(graphicsDevice, InstanceData.VertexDeclaration, maxInstancesPerBatch, BufferUsage.WriteOnly);
-    }
-    
-    private short[] CreateIndices()
-    {
-        return new short[]
-        {
-            0, 1, 2, 0, 2, 3, // Front
-            4, 5, 6, 4, 6, 7, // Back
-            8, 9, 10, 8, 10, 11, // Top
-            12, 13, 14, 12, 14, 15, // Bottom
-            16, 17, 18, 16, 18, 19, // Left
-            20, 21, 22, 20, 22, 23 // Right
-        };
     }
 
     public void UpdateInstances(IEnumerable<CubeData> cubes)
@@ -102,6 +90,33 @@ public class CubeRenderer
             texturedInstances[cube.Texture] = (instances, count);
         }
     }
+    
+    public void UpdateComplexInstances(IEnumerable<CubeData> cubes, BlockModel model)
+    {
+        texturedComplexInstances.Clear();
+        
+        foreach (var cube in cubes)
+        {
+            if (!texturedComplexInstances.ContainsKey((cube.Texture, model)))
+            {
+                texturedComplexInstances[(cube.Texture, model)] = (new InstanceData[1000], 0);
+            }
+            var textureBatch = texturedComplexInstances[(cube.Texture, model)];
+            ref var instances = ref textureBatch.instances;
+            ref var count = ref textureBatch.count;
+
+            instances[count++] = new InstanceData
+            {
+                World = Matrix.CreateTranslation(cube.Position) * Matrix.CreateScale(cube.Scale)
+            };
+
+            texturedComplexInstances[(cube.Texture, model)] = (instances, count);
+        }
+        
+        Console.WriteLine("Complex instances updated.");
+        Console.WriteLine($"Textured complex instances: {texturedComplexInstances.Count}");
+        Console.WriteLine($"Textured instances: {texturedInstances.Count}");
+    }
 
     public void Draw()
     {
@@ -122,8 +137,6 @@ public class CubeRenderer
             
             effect.Parameters["Texture"].SetValue(texture);
             
-            instanceBuffer.SetData(instances, 0, instanceCount);
-            
             instanceBuffer.SetData(instances);
             graphicsDevice.SetVertexBuffers(
                     new VertexBufferBinding(vertexBuffer, 0, 0),
@@ -133,6 +146,28 @@ public class CubeRenderer
             {
                 pass.Apply();
                 graphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 24, 0, 12, instanceCount);
+            }
+        }
+        
+        foreach(var textureBatch in texturedComplexInstances)
+        {
+            var (texture, model) = textureBatch.Key;
+            var (instances, instanceCount) = textureBatch.Value;
+            
+            graphicsDevice.SetVertexBuffer(model.VertexBuffer);
+            graphicsDevice.Indices = model.IndexBuffer;
+            
+            effect.Parameters["Texture"].SetValue(texture);
+            
+            instanceBuffer.SetData(instances);
+            graphicsDevice.SetVertexBuffers(
+                new VertexBufferBinding(model.VertexBuffer, 0, 0),
+                new VertexBufferBinding(instanceBuffer, 0, 1)
+            );
+            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                graphicsDevice.DrawInstancedPrimitives(PrimitiveType.TriangleList, 0, 0, 24 * model.SubMeshes.Count, 0, 12 * model.SubMeshes.Count, instanceCount);
             }
         }
     }
