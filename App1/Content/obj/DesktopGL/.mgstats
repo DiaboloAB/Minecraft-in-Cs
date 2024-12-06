@@ -1,8 +1,8 @@
 Source File,Dest File,Processor Type,Content Type,Source File Size,Dest File Size,Build Seconds
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Chest.json","C:\Users\alexi\RiderProjects\App1\App1\Content\bin\DesktopGL\Chest.json","CopyItem","File",1289,1289,0,0043045
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Effects/InstancedEffect.fx","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Effects/InstancedEffect.xnb","EffectProcessor","CompiledEffectContent",1465,2071,0,4638154
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Fonts/File.spritefont","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Fonts/File.xnb","FontDescriptionProcessor","SpriteFontContent",2081,21535,0,1499411
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Chest.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Chest.xnb","TextureProcessor","Texture2DContent",595,4181,0,0117975
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Crosshair.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Crosshair.xnb","TextureProcessor","Texture2DContent",130,1109,0,0030538
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Grass.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Grass.xnb","TextureProcessor","Texture2DContent",2054,12373,0,0023909
-"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Stone.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Stone.xnb","TextureProcessor","Texture2DContent",899,12373,0,0025882
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Chest.json","C:\Users\alexi\RiderProjects\App1\App1\Content\bin\DesktopGL\Chest.json","CopyItem","File",1289,1289,0,0028808
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Fonts/File.spritefont","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Fonts/File.xnb","FontDescriptionProcessor","SpriteFontContent",2081,21535,0,2191868
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Chest.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Chest.xnb","TextureProcessor","Texture2DContent",595,4181,0,0107302
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Crosshair.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Crosshair.xnb","TextureProcessor","Texture2DContent",130,1109,0,0016355
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Default.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Default.xnb","TextureProcessor","Texture2DContent",269,12373,0,0030944
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Grass.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Grass.xnb","TextureProcessor","Texture2DContent",2054,12373,0,0022984
+"C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Stone.png","C:/Users/alexi/RiderProjects/App1/App1/Content/bin/DesktopGL/Textures/Stone.xnb","TextureProcessor","Texture2DContent",899,12373,0,0023662

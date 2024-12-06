@@ -8,7 +8,9 @@ public class Camera
 {
     public Matrix View { get; private set; }
     public Matrix Projection { get; private set; }
-    public Vector3 Position { get; private set; }
+    public Vector3 Position { get; set; }
+    
+    //360 degrees
     public Vector3 Rotation { get; private set; }
     
     public string Facing { get; private set; } = "north";
@@ -68,6 +70,13 @@ public class Camera
         
         Console.WriteLine("Rotation: " + Rotation);
         
+        
+        Vector3 Rotation360 = new Vector3(
+            MathHelper.WrapAngle(Rotation.X),
+            MathHelper.WrapAngle(Rotation.Y),
+            MathHelper.WrapAngle(Rotation.Z)
+        );
+        
         if (Rotation.Y > Math.PI)
         {
             Rotation = new Vector3(Rotation.X, Rotation.Y - MathHelper.TwoPi, Rotation.Z);
@@ -79,20 +88,28 @@ public class Camera
         
         
         
+        if (Rotation360.X > MathHelper.PiOver2 - 0.1f)
+        {
+            Rotation = new Vector3(MathHelper.PiOver2 - 0.1f, Rotation.Y, Rotation.Z);
+        }
+        else if (Rotation360.X < -MathHelper.PiOver2 + 0.1f)
+        {
+            Rotation = new Vector3(-MathHelper.PiOver2 + 0.1f, Rotation.Y, Rotation.Z);
+        }
+        
         UpdateViewMatrix();
         UpdateFacing();
     }
     public void Move(Vector3 movement)
     {
-        Vector3 dir = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z));
-        dir = Vector3.Normalize(dir);
-        
+        Vector3 forwardNoPitch = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Rotation.Y));
+        forwardNoPitch = Vector3.Normalize(forwardNoPitch);
+
         Position += new Vector3(
-            dir.X * movement.Z + dir.Z * movement.X,
+            forwardNoPitch.X * movement.Z + forwardNoPitch.Z * movement.X,
             movement.Y,
-            dir.Z * movement.Z - dir.X * movement.X
-            );
-        //
+            forwardNoPitch.Z * movement.Z - forwardNoPitch.X * movement.X
+        );
         UpdateViewMatrix();
     }
     

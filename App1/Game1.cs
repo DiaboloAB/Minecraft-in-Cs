@@ -14,19 +14,22 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Vector2 lastMousePosition;
-    
+
+    private Texture2D defaultTexture;
     Texture2D texture;
     Texture2D texture2;
     private List<CubeData> cubes;
     
     private CubeRenderer cubeRenderer;
     
+    private ChunkGenerator chunkGenerator;
     
     private Camera camera;
     private ChunkMeshBuilder chunkMeshBuilder;
     private Chunk[] chunks;
     
     private double fps = 0;
+    private List<double> fpsList = new List<double>();
     
     ContentManager content => Content;
     
@@ -35,13 +38,17 @@ public class Game1 : Game
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
+        // _graphics.SynchronizeWithVerticalRetrace = false; 
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
+        int seed = 2134512354;
+        chunkGenerator = new ChunkGenerator(seed);
     }
 
     protected override void Initialize()
     {
         camera = new Camera(GraphicsDevice);
+        camera.Position = new Vector3(0, 50, 0);
         
         Effect effect;
         try
@@ -55,7 +62,21 @@ public class Game1 : Game
         }
         texture = content.Load<Texture2D>("Textures/Grass");
         texture2 = content.Load<Texture2D>("Textures/Stone");
-        chunks = new Chunk[1];
+        defaultTexture = content.Load<Texture2D>("Textures/Default");
+        chunkGenerator.Textures = new Texture2D[]
+        {
+            defaultTexture,
+            texture,
+            texture2
+        };
+        chunks = new Chunk[50];
+        int i = 0;
+        // for (int x = 0; x < 2; x++)
+        //     for (int z = 0; z < 2; z++)
+        //     {   
+        //         chunks[i++] = chunkGenerator.GenerateChunk(x, z);
+        //     }
+        chunks[0] = chunkGenerator.GenerateChunk(0, 0);
         
         lastMousePosition = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
@@ -64,6 +85,7 @@ public class Game1 : Game
         IsFixedTimeStep = false;
         _graphics.ApplyChanges();
         cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
+        
         CreateTestCubes();
         CreateTestChests();
         
@@ -98,50 +120,13 @@ public class Game1 : Game
     private void CreateTestCubes()
     {
         cubes = new List<CubeData>();
-        Random random = new Random();
-        
-        // for (int i = 0; i < 10; i++)
-        // {
-        //     for (int j = 0; j < 10; j++)
-        //     {
-        //         cubes.Add(
-        //             new CubeData
-        //             {
-        //                 Position = new Vector3(i, 0, j),
-        //                 Scale = new Vector3(1, 1, 1),
-        //                 Texture = random.Next(0, 2) == 0 ? texture : texture2
-        //             }
-        //         );
-        //     }
-        // }
-        
-        cubes.Add(
-            new CubeData
-            {
-                Position = new Vector3(0, -2, 0),
-                Scale = new Vector3(1, 1, 1),
-                Texture = texture
-            }
-        );
-        
-        cubes.Add(
-            new CubeData
-            {
-                Position = new Vector3(0, -1, 0),
-                Scale = new Vector3(1, 1, 1),
-                Texture = texture
-            }
-        );
-        
-        cubes.Add(
-            new CubeData
-            {
-                Position = new Vector3(1, 0, 0),
-                Scale = new Vector3(1, 1, 1),
-                Texture = texture
-            }
-        );
-        
+
+        for (int i = 0; i < 1; i++)
+        {
+            cubes.AddRange(chunks[i].getVisibleCubes(chunkGenerator.Textures));
+        }
+
+        Console.WriteLine($"Cubes: {cubes.Count}");
         cubeRenderer.UpdateInstances(cubes);
     }
 
@@ -160,8 +145,20 @@ public class Game1 : Game
 
         HandleInput(gameTime);
         
-        fps = 1 / gameTime.ElapsedGameTime.TotalSeconds;
-
+        fpsList.Add(1 / gameTime.ElapsedGameTime.TotalSeconds);
+        
+        if (fpsList.Count > 10)
+        {
+            fpsList.RemoveAt(0);
+        }
+        double sum = 0;
+        foreach (var f in fpsList)
+            sum += f;
+        
+        fps = sum / fpsList.Count;
+        
+        
+        
         base.Update(gameTime);
     }
     
