@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using App1.Core.World;
 using App1.Graphics;
+using App1.Graphics.Textures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Vector2 = System.Numerics.Vector2;
+
 
 namespace App1;
 
@@ -14,6 +17,7 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Vector2 lastMousePosition;
+    private World world;
 
     private Texture2D defaultTexture;
     Texture2D texture;
@@ -37,12 +41,12 @@ public class Game1 : Game
 
     public Game1()
     {
+        world = new World(467465678);
         _graphics = new GraphicsDeviceManager(this);
         // _graphics.SynchronizeWithVerticalRetrace = false; 
         Content.RootDirectory = "Content";
         IsMouseVisible = false;
-        int seed = 2134512354;
-        chunkGenerator = new ChunkGenerator(seed);
+
     }
 
     protected override void Initialize()
@@ -62,21 +66,39 @@ public class Game1 : Game
         }
         texture = content.Load<Texture2D>("Textures/Grass");
         texture2 = content.Load<Texture2D>("Textures/Stone");
+
+        Dictionary<string, Texture2D> textureDic = new Dictionary<string, Texture2D>();
         defaultTexture = content.Load<Texture2D>("Textures/Default");
-        chunkGenerator.Textures = new Texture2D[]
-        {
-            defaultTexture,
-            texture,
-            texture2
-        };
-        chunks = new Chunk[50];
-        int i = 0;
-        // for (int x = 0; x < 2; x++)
-        //     for (int z = 0; z < 2; z++)
-        //     {   
-        //         chunks[i++] = chunkGenerator.GenerateChunk(x, z);
-        //     }
-        chunks[0] = chunkGenerator.GenerateChunk(0, 0);
+        crosshair = content.Load<Texture2D>("Textures/Crosshair");
+        textureDic.Add("grass", texture);
+        textureDic.Add("stone", texture2);
+        textureDic.Add("default", defaultTexture);
+        textureDic.Add("chest", content.Load<Texture2D>("Textures/Chest"));
+        textureDic.Add("crosshair", content.Load<Texture2D>("Textures/Crosshair"));
+        
+        textureDic.Add("grass0", texture);
+        textureDic.Add("stone0", texture2);
+        textureDic.Add("default0", defaultTexture);
+        textureDic.Add("chest0", content.Load<Texture2D>("Textures/Chest"));
+        textureDic.Add("crosshair0", content.Load<Texture2D>("Textures/Crosshair"));
+        
+        textureDic.Add("grass1", texture);
+        textureDic.Add("stone1", texture2);
+        textureDic.Add("default1", defaultTexture);
+        textureDic.Add("chest1", content.Load<Texture2D>("Textures/Chest"));
+        textureDic.Add("crosshair1", content.Load<Texture2D>("Textures/Crosshair"));
+        
+        textureDic.Add("grass2", texture);
+        textureDic.Add("stone2", texture2);
+        textureDic.Add("default2", defaultTexture);
+        textureDic.Add("chest2", content.Load<Texture2D>("Textures/Chest"));
+        textureDic.Add("crosshair2", content.Load<Texture2D>("Textures/Crosshair"));
+        
+        Atlas atlas = new Atlas(GraphicsDevice, textureDic, new Vector2(1000, 1000));
+        atlas.Save();
+        
+
+
         
         lastMousePosition = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
@@ -89,7 +111,6 @@ public class Game1 : Game
         CreateTestCubes();
         CreateTestChests();
         
-        crosshair = content.Load<Texture2D>("Textures/Crosshair");
         
         base.Initialize();
     }
@@ -121,11 +142,14 @@ public class Game1 : Game
     {
         cubes = new List<CubeData>();
 
-        for (int i = 0; i < 1; i++)
-        {
-            cubes.AddRange(chunks[i].getVisibleCubes(chunkGenerator.Textures));
-        }
 
+        Texture2D[] textures = new Texture2D[]
+        {
+            defaultTexture,
+            texture,
+            texture2
+        };
+        cubes = world.GetVisibleCubes(textures);
         Console.WriteLine($"Cubes: {cubes.Count}");
         cubeRenderer.UpdateInstances(cubes);
     }
@@ -198,18 +222,6 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        
-        
-        foreach (var chunk in chunks)
-        {
-            // if (chunk.IsDirty)
-            // {
-            //     chunk.IsDirty = false;
-            //     // chunkMeshBuilder.BuildMeshes(chunk);
-            //     // cubeRenderer.UpdateInstances(chunkMeshBuilder.GetCubes());
-            // }
-        }
-        
         
         cubeRenderer.Draw();
         

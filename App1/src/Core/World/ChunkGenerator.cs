@@ -14,7 +14,6 @@ public class ChunkGenerator
     {
         this.seed = seed;
         
-        
         Textures = new Texture2D[BlockType.GetValues(typeof(BlockType)).Length];
     }
     
