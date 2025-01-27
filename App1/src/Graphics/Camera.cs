@@ -68,7 +68,7 @@ public class Camera
     {
         Rotation += rotation;
         
-        Console.WriteLine("Rotation: " + Rotation);
+        // Console.WriteLine("Rotation: " + Rotation);
         
         
         Vector3 Rotation360 = new Vector3(

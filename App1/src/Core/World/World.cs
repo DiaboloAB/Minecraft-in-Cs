@@ -52,4 +52,21 @@ public class World
         }
         return cubes;
     }
+    
+    public List<FaceData> GetVisibleFaces(Texture2D[] textures)
+    {
+        int nbChunks = chunks.Length * chunks[0].Length;
+        Console.WriteLine("Nb chunks: " + nbChunks);
+        
+        List<FaceData> cubes = new List<FaceData>();
+        for (int x = 0; x < worldSize.X; x++)
+        {
+            for (int z = 0; z < worldSize.Y; z++)
+            {
+                // cubes.AddRange(chunks[x][z].getVisibleCubes(textures));
+                cubes.AddRange(chunks[x][z].getVisibleFaces(textures));
+            }
+        }
+        return cubes;
+    }
 }

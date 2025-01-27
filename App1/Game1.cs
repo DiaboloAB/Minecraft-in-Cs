@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using App1.Core.World;
 using App1.Graphics;
 using App1.Graphics.Textures;
+using App1.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Vector2 = System.Numerics.Vector2;
 
 
 namespace App1;
@@ -22,9 +22,9 @@ public class Game1 : Game
     private Texture2D defaultTexture;
     Texture2D texture;
     Texture2D texture2;
-    private List<CubeData> cubes;
     
     private CubeRenderer cubeRenderer;
+    private FaceRenderer faceRenderer;
     
     private ChunkGenerator chunkGenerator;
     
@@ -38,14 +38,17 @@ public class Game1 : Game
     ContentManager content => Content;
     
     Texture2D crosshair;
+    
+    Atlas atlas;
 
     public Game1()
     {
         world = new World(467465678);
         _graphics = new GraphicsDeviceManager(this);
-        // _graphics.SynchronizeWithVerticalRetrace = false; 
-        Content.RootDirectory = "Content";
+        Content.RootDirectory = "Content";                 
         IsMouseVisible = false;
+        _graphics.SynchronizeWithVerticalRetrace = true;
+        IsFixedTimeStep = false;
 
     }
 
@@ -54,10 +57,12 @@ public class Game1 : Game
         camera = new Camera(GraphicsDevice);
         camera.Position = new Vector3(0, 50, 0);
         
-        Effect effect;
+        // Effect effect;
+        Effect effectbis;
         try
         {
-            effect = content.Load<Effect>("Effects/InstancedEffect");
+            // effect = content.Load<Effect>("Effects/InstancedEffect");
+            effectbis = content.Load<Effect>("Effects/FaceEffect");
             Console.WriteLine("Effect loaded successfully.");
         }
         catch (ContentLoadException e)
@@ -70,31 +75,14 @@ public class Game1 : Game
         Dictionary<string, Texture2D> textureDic = new Dictionary<string, Texture2D>();
         defaultTexture = content.Load<Texture2D>("Textures/Default");
         crosshair = content.Load<Texture2D>("Textures/Crosshair");
-        textureDic.Add("grass", texture);
+        textureDic.Add("Grass", texture);
         textureDic.Add("stone", texture2);
         textureDic.Add("default", defaultTexture);
         textureDic.Add("chest", content.Load<Texture2D>("Textures/Chest"));
         textureDic.Add("crosshair", content.Load<Texture2D>("Textures/Crosshair"));
         
-        textureDic.Add("grass0", texture);
-        textureDic.Add("stone0", texture2);
-        textureDic.Add("default0", defaultTexture);
-        textureDic.Add("chest0", content.Load<Texture2D>("Textures/Chest"));
-        textureDic.Add("crosshair0", content.Load<Texture2D>("Textures/Crosshair"));
         
-        textureDic.Add("grass1", texture);
-        textureDic.Add("stone1", texture2);
-        textureDic.Add("default1", defaultTexture);
-        textureDic.Add("chest1", content.Load<Texture2D>("Textures/Chest"));
-        textureDic.Add("crosshair1", content.Load<Texture2D>("Textures/Crosshair"));
-        
-        textureDic.Add("grass2", texture);
-        textureDic.Add("stone2", texture2);
-        textureDic.Add("default2", defaultTexture);
-        textureDic.Add("chest2", content.Load<Texture2D>("Textures/Chest"));
-        textureDic.Add("crosshair2", content.Load<Texture2D>("Textures/Crosshair"));
-        
-        Atlas atlas = new Atlas(GraphicsDevice, textureDic, new Vector2(1000, 1000));
+        atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
         atlas.Save();
         
 
@@ -104,17 +92,18 @@ public class Game1 : Game
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         _graphics.PreferredBackBufferWidth = 1920;
         _graphics.PreferredBackBufferHeight = 1080;
-        IsFixedTimeStep = false;
         _graphics.ApplyChanges();
-        cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
+        // cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
+        faceRenderer = new FaceRenderer(GraphicsDevice, effectbis, camera, 16f / 2048f, 50000);
+        faceRenderer.SetAtlasTexture(atlas.Texture);
         
-        CreateTestCubes();
-        CreateTestChests();
-        
+        // CreateTestCubes();
+        // CreateTestChests();
+        CreateFaces();
         
         base.Initialize();
     }
-
+    
     private void CreateTestChests()
     {
         BlockModel model = BlockModel.LoadModel(content, "Chest", GraphicsDevice);
@@ -122,6 +111,7 @@ public class Game1 : Game
         
         Texture2D texture = content.Load<Texture2D>("Textures/Chest");
         
+        List<CubeData> cubes;
         cubes = new List<CubeData>();
         
         cubes.Add(
@@ -138,10 +128,10 @@ public class Game1 : Game
         
     }
     
-    private void CreateTestCubes()
+    private void CreateFaces()
     {
-        cubes = new List<CubeData>();
-
+        List<FaceData> faces;
+        faces = new List<FaceData>();
 
         Texture2D[] textures = new Texture2D[]
         {
@@ -149,9 +139,9 @@ public class Game1 : Game
             texture,
             texture2
         };
-        cubes = world.GetVisibleCubes(textures);
-        Console.WriteLine($"Cubes: {cubes.Count}");
-        cubeRenderer.UpdateInstances(cubes);
+        faces = world.GetVisibleFaces(textures);
+        Console.WriteLine($"Cubes: {faces.Count}");
+        faceRenderer.UpdateInstances(faces);
     }
 
     protected override void LoadContent()
@@ -216,19 +206,23 @@ public class Game1 : Game
 
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         
-        cubeRenderer.UpdateViewProjection(camera);
+        // cubeRenderer.UpdateViewProjection(camera);
+        faceRenderer.UpdateViewProjection(camera);
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.CornflowerBlue);
         
-        cubeRenderer.Draw();
+        // cubeRenderer.Draw();
+        faceRenderer.Draw();
+        Vector3 camRotation = camera.Rotation;
         
         _spriteBatch.Begin();
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {camera.Facing}", new Vector2(10, 30), Color.White);
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) camera.Position.X}, {(int) camera.Position.Y}, {(int) camera.Position.Z}", new Vector2(10, 50), Color.White);
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
         _spriteBatch.Draw(
             crosshair, 
             new Vector2(GraphicsDevice.Viewport.Width / 2 - crosshair.Width, GraphicsDevice.Viewport.Height / 2 - crosshair.Height), 
@@ -240,7 +234,9 @@ public class Game1 : Game
             SpriteEffects.None, 
             0f
         );
+        _spriteBatch.Draw(texture, new Rectangle(10, 70, 32, 32), Color.White);
         _spriteBatch.End();
+        
         
         base.Draw(gameTime);
     }

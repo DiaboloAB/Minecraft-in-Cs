@@ -62,6 +62,40 @@ public class Chunk
         }
         return cubes;
     }
+
+    public List<FaceData> getVisibleFaces(Texture2D[] textures)
+    {
+        List<FaceData> faces = new List<FaceData>();
+        for (int x = 0; x < SIZE; x++)
+        {
+            for (int y = 0; y < HEIGHT; y++)
+            {
+                for (int z = 0; z < SIZE; z++)
+                {
+                    int blockType = blocks[x, y, z];
+                    if (blockType == 0) continue;
+                    Vector3 blockPos = new Vector3(x, y, z);
+
+                    int faceMask = CalculateFaceMask(x, y, z);
+                    if (faceMask == 0) continue;
+
+                    for (int i = 0; i < 6; i++)
+                    {
+                        faces.Add(new FaceData
+                        {
+                            Position = blockPos + position,
+                            TexCoord = new Vector2(0, 0),
+                            Orientation = (short)i
+                        });
+                    }
+                    
+                    
+                }
+            }
+        }
+
+        return faces;
+    }
     
     private int CalculateFaceMask(int x, int y, int z)
     {

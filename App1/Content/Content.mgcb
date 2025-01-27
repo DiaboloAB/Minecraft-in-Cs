@@ -16,6 +16,18 @@
 #begin Chest.json
 /copy:Chest.json
 
+#begin Effects/FaceEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/FaceEffect.fx
+
+#begin Effects/InstancedEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/InstancedEffect.fx
+
 #begin Effects/InstancedEffect.fx
 /importer:EffectImporter
 /processor:EffectProcessor

@@ -1,5 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Numerics;
+using System.Runtime;
 using Microsoft.Xna.Framework.Graphics;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace App1.Graphics;
 
@@ -8,6 +11,15 @@ public struct CubeData
     public Vector3 Position { get; set; }
     public Vector3 Scale { get; set; }
     public Texture2D Texture { get; set; }
+    // public Vector3 Name { get; set; }
+
+}
+
+public struct FaceData
+{
+    public Vector3 Position { get; set; }
+    public Vector2 TexCoord { get; set; }
+    public short Orientation { get; set; }
 }
 
 public class Cube
@@ -23,6 +35,69 @@ public class Cube
             16, 17, 18, 16, 18, 19, // Left
             20, 21, 22, 20, 22, 23 // Right
         };
+    }
+        
+    //all 4 vertices of all faces
+    public static readonly Vector3[][] FaceVertices = new Vector3[][]
+    {
+        new Vector3[] 
+        {
+            new Vector3(-0.5f,  0.5f,  0.5f),
+            new Vector3( 0.5f,  0.5f,  0.5f),
+            new Vector3( 0.5f, -0.5f,  0.5f),
+            new Vector3(-0.5f, -0.5f,  0.5f)
+        },
+        // Back face
+        new Vector3[]
+        {
+            new Vector3( 0.5f,  0.5f, -0.5f),
+            new Vector3(-0.5f,  0.5f, -0.5f),
+            new Vector3(-0.5f, -0.5f, -0.5f),
+            new Vector3( 0.5f, -0.5f, -0.5f)
+        },
+        // Top face
+        new Vector3[]
+        {
+            new Vector3(-0.5f,  0.5f, -0.5f),
+            new Vector3( 0.5f,  0.5f, -0.5f),
+            new Vector3( 0.5f,  0.5f,  0.5f),
+            new Vector3(-0.5f,  0.5f,  0.5f)
+        },
+        // Bottom face
+        new Vector3[]
+        {
+            new Vector3(-0.5f, -0.5f,  0.5f),
+            new Vector3( 0.5f, -0.5f,  0.5f),
+            new Vector3( 0.5f, -0.5f, -0.5f),
+            new Vector3(-0.5f, -0.5f, -0.5f)
+        },
+        // Left face
+        new Vector3[]
+        {
+            new Vector3(-0.5f,  0.5f, -0.5f),
+            new Vector3(-0.5f,  0.5f,  0.5f),
+            new Vector3(-0.5f, -0.5f,  0.5f),
+            new Vector3(-0.5f, -0.5f, -0.5f)
+        },
+        // Right face
+        new Vector3[]
+        {
+            new Vector3(0.5f,  0.5f,  0.5f),
+            new Vector3(0.5f,  0.5f, -0.5f),
+            new Vector3(0.5f, -0.5f, -0.5f),
+            new Vector3(0.5f, -0.5f,  0.5f)
+        }
+    };
+    
+    public static VertexPositionTexture[] CreateFaceVertices(int orientation, float texSize)
+    {
+       return new VertexPositionTexture[] 
+       {
+           new VertexPositionTexture(FaceVertices[orientation][0], new Vector2(0, 0)),
+           new VertexPositionTexture(FaceVertices[orientation][1], new Vector2(texSize, 0)),
+           new VertexPositionTexture(FaceVertices[orientation][2], new Vector2(texSize, texSize)),
+           new VertexPositionTexture(FaceVertices[orientation][3], new Vector2(0, texSize))
+       };
     }
     
     public static VertexPositionTexture[] CreateVertices()

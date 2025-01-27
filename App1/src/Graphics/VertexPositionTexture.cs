@@ -19,3 +19,17 @@ public struct VertexPositionTexture
         Texturecoordinate = texturecoordinate;
     }
 }
+
+public struct VertexPosition
+{
+    public Vector3 Position;
+    
+    public readonly static VertexDeclaration VertexDeclaration = new VertexDeclaration(
+        new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0)
+    );
+    
+    public VertexPosition(Vector3 position)
+    {
+        Position = position;
+    }
+}

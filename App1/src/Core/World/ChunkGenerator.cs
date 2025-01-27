@@ -12,7 +12,19 @@ public class ChunkGenerator
     
     public ChunkGenerator(int seed)
     {
-        this.seed = seed;
+        // get random nbr
+        int random = new Random().Next();
+        this.seed = random;
+        
+        noise.SetSeed(random);
+        noise = new FastNoiseLite(random);
+        noise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        noise.SetFrequency(0.1f);
+        noise.SetFractalType(FastNoiseLite.FractalType.FBm);
+        noise.SetFractalOctaves(2);
+        noise.SetFractalLacunarity(2.0f);
+        noise.SetFractalGain(0.5f);
+        
         
         Textures = new Texture2D[BlockType.GetValues(typeof(BlockType)).Length];
     }
