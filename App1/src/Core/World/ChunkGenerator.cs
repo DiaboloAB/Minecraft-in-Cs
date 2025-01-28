@@ -8,6 +8,7 @@ public class ChunkGenerator
 {
     private int seed;
     FastNoiseLite noise = new FastNoiseLite();
+    FastNoiseLite caveNoise;
     public Texture2D[] Textures { get; set; }
     
     public ChunkGenerator(int seed)
@@ -24,7 +25,10 @@ public class ChunkGenerator
         noise.SetFractalOctaves(2);
         noise.SetFractalLacunarity(2.0f);
         noise.SetFractalGain(0.5f);
-        
+
+        caveNoise = new FastNoiseLite(seed + 1);
+        caveNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+        caveNoise.SetFrequency(0.5f);
         
         Textures = new Texture2D[BlockType.GetValues(typeof(BlockType)).Length];
     }
@@ -40,37 +44,108 @@ public class ChunkGenerator
         {
             for (int k = 0; k < width; k++)
             {
-                int stoneHeight = (int)(noise.GetNoise((x * Chunk.SIZE + i) * 0.1f, (z * Chunk.SIZE  + k) * 0.1f) * 10) + 10;
+                int stoneHeight = (int)(noise.GetNoise((x * Chunk.SIZE + i) * 0.1f, (z * Chunk.SIZE  + k) * 0.1f) * 10) + 50;
                 for (int j = 0; j < height; j++)
                 {
-                    if (j < stoneHeight)
-                    {
-                        chunk.SetBlock(i, j, k, (int)BlockType.Stone);
-                    }
-                    else if (j == stoneHeight)
+                    float caveValue = caveNoise.GetNoise((x * Chunk.SIZE + i) * 0.1f, j * 0.1f, (z * Chunk.SIZE + k) * 0.1f);
+
+                    // Tunneling algorithm to create long caves
+                    if (caveValue > 0.5f && IsTunnel(x * Chunk.SIZE + i, j, z * Chunk.SIZE + k))
+                        continue;
+                    
+                    // 1 block of grass, 2 block of dirt, rest with stone
+                    if (j == stoneHeight)
                     {
                         chunk.SetBlock(i, j, k, (int)BlockType.Grass);
                     }
-                    else
+                    else if (j < stoneHeight && j > stoneHeight - 3)
                     {
-                        chunk.SetBlock(i, j, k, (int)BlockType.Air);
+                        chunk.SetBlock(i, j, k, (int)BlockType.Dirt);
                     }
-                    
+                    else if (j < stoneHeight && j >= stoneHeight - 50)
+                    {
+                        chunk.SetBlock(i, j, k, (int)BlockType.Stone);
+                    }
                 }
             }
             
         }
-
         return chunk;
 
     }
+    private bool IsTunnel(int x, int y, int z)
+    {
+        // Simple tunneling algorithm to create long caves
+        float tunnelValueX = caveNoise.GetNoise(x * 0.05f, y * 0.05f, z * 0.05f);
+        float tunnelValueY = caveNoise.GetNoise(x * 0.05f, z * 0.05f, y * 0.05f);
+        float tunnelValueZ = caveNoise.GetNoise(y * 0.05f, x * 0.05f, z * 0.05f);
+
+        return tunnelValueX > 0.5f || tunnelValueY > 0.5f || tunnelValueZ > 0.5f;
+    }
+
+    public void GenerateTrees(Chunk chunk, int chunkX, int chunkZ, World world)
+    {
+        Random random = new Random(seed + chunkX * 1000 + chunkZ);
+        int treeCount = random.Next(1, 5); // Random number of trees per chunk
+
+        for (int i = 0; i < treeCount; i++)
+        {
+            int x = random.Next(0, Chunk.SIZE);
+            int z = random.Next(0, Chunk.SIZE);
+            int y = FindGround(chunk, x, z);
+
+            if (y > 0)
+            {
+                PlaceTree(chunk, x, y, z, world);
+            }
+        }
+    }
+
+    private int FindGround(Chunk chunk, int x, int z)
+    {
+        for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
+        {
+            if (chunk.GetBlock(new Vector3(x, y, z)) == (int)BlockType.Grass)
+            {
+                return y + 1;
+            }
+        }
+        return -1;
+    }
     
-    
+    private void PlaceTree(Chunk chunk, int x, int y, int z, World world)
+    {
+        // Trunk
+        for (int i = 0; i < 5; i++)
+        {
+            world.SetBlock((int)(Chunk.SIZE * chunk.position.X + x), y + i, (int)(Chunk.SIZE * chunk.position.Z + z), (int)BlockType.Wood);
+        }
+
+        // leaves
+        for (int i = -2; i < 3; i++)
+        {
+            for (int j = 0; j < 5; j++)
+            {
+                for (int k = -2; k < 3; k++)
+                {
+                    if (Math.Abs(i) + Math.Abs(j) + Math.Abs(k) < 5)
+                    {
+                        world.SetBlock((int)(Chunk.SIZE * chunk.position.X + x + i), y + 5 + j, (int)(Chunk.SIZE * chunk.position.Z + z + k), (int)BlockType.Leaves);
+                    }
+                }
+            }
+        }
+        
+    }
+
 }
 
 public enum BlockType
 {
     Air = 0,
     Grass = 1,
-    Stone = 2
+    Stone = 2,
+    Dirt = 3,
+    Wood = 4,
+    Leaves = 5,
 }

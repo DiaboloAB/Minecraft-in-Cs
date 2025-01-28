@@ -11,9 +11,13 @@
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Crosshair.png</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Default.png</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Grass.png</File>
+    <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Leaves.png</File>
     <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Stone.png</File>
+    <File>C:/Users/alexi/RiderProjects/App1/App1/Content/Textures/Wood.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

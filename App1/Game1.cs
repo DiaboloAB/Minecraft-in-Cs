@@ -80,7 +80,8 @@ public class Game1 : Game
         textureDic.Add("default", defaultTexture);
         textureDic.Add("chest", content.Load<Texture2D>("Textures/Chest"));
         textureDic.Add("crosshair", content.Load<Texture2D>("Textures/Crosshair"));
-        
+        textureDic.Add("leaves", content.Load<Texture2D>("Textures/Leaves"));
+        textureDic.Add("wood", Content.Load<Texture2D>("textures/Wood"));
         
         atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
         atlas.Save();

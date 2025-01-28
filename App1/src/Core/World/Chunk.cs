@@ -12,7 +12,7 @@ public class Chunk
     public const int SIZE = 16;
     public const int HEIGHT = 256;
     private readonly int [,,] blocks;
-    private Vector3 position;
+    public Vector3 position;
     public bool IsDirty = true;
     
     private World world;
@@ -26,26 +26,37 @@ public class Chunk
     
     public int GetBlockFromNeighboringChunks(int x, int y, int z)
     {
-        
         try
         {
+            int blockType;
             if (x < 0)
             {
-                return world.GetChunk((int)position.X - 1, (int)position.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
+                blockType = world.GetChunk((int)position.X - 1, (int)position.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
             }
-            if (x >= Chunk.SIZE)
+            else if (x >= Chunk.SIZE)
             {
-                return world.GetChunk((int)position.X + 1, (int)position.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
+                blockType = world.GetChunk((int)position.X + 1, (int)position.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
             }
-            if (z < 0)
+            else if (z < 0)
             {
-                return world.GetChunk((int)position.X, (int)position.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
+                blockType = world.GetChunk((int)position.X, (int)position.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
             }
-            if (z >= Chunk.SIZE)
+            else if (z >= Chunk.SIZE)
             {
-                return world.GetChunk((int)position.X, (int)position.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
+                blockType = world.GetChunk((int)position.X, (int)position.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
             }
-            return GetBlock(new Vector3(x, y, z));
+            else
+            {
+                blockType = GetBlock(new Vector3(x, y, z));
+            }
+
+            // Treat Leaves as Air
+            if (blockType == (int)BlockType.Leaves)
+            {
+                return 0;
+            }
+
+            return blockType;
         }
         catch
         {

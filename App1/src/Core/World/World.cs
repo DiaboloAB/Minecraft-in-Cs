@@ -11,7 +11,7 @@ public class World
 {
     private ChunkGenerator chunkGenerator;
     private Chunk[][] chunks;
-    private Vector2 worldSize = new Vector2(7, 7);
+    private Vector2 worldSize = new Vector2(5, 16);
     public World(int seed)
     {
         chunkGenerator = new ChunkGenerator(seed);
@@ -24,6 +24,10 @@ public class World
                 chunks[x][z] = chunkGenerator.GenerateChunk(x, z, this);
             }
         }
+        for (int x = 0; x < worldSize.X; x++)
+            for (int z = 0; z < worldSize.Y; z++)
+                chunkGenerator.GenerateTrees(chunks[x][z], x, z, this);
+
     }
     
     public Chunk GetChunk(int x, int z)
@@ -31,10 +35,24 @@ public class World
         return chunks[x][z];
     }
     
-    public void SetBlock(int x, int y, int z, int type)
+    public int GetBlock(int x, int y, int z)
     {
         int chunkX = x / Chunk.SIZE;
         int chunkZ = z / Chunk.SIZE;
+        return chunks[chunkX][chunkZ].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
+    }
+    
+    public void SetBlock(int x, int y, int z, int type)
+    {
+        if (x < 0 || y < 0 || z < 0)
+            return;
+        Console.WriteLine(x + " " + y + " " + z);
+        int chunkX = x / Chunk.SIZE;
+        int chunkZ = z / Chunk.SIZE;
+        Console.WriteLine(" " + chunkX + " " + chunkZ);
+        if (!(chunkX >= 0 && chunkZ >= 0 && chunkX < worldSize.X && chunkZ < worldSize.Y))
+            return;
+
         chunks[chunkX][chunkZ].SetBlock(x % Chunk.SIZE, y, z % Chunk.SIZE, type);
     }
     
