@@ -75,7 +75,7 @@ public class Game1 : Game
         Dictionary<string, Texture2D> textureDic = new Dictionary<string, Texture2D>();
         defaultTexture = content.Load<Texture2D>("Textures/Default");
         crosshair = content.Load<Texture2D>("Textures/Crosshair");
-        textureDic.Add("Grass", texture);
+        textureDic.Add("grass", texture);
         textureDic.Add("stone", texture2);
         textureDic.Add("default", defaultTexture);
         textureDic.Add("chest", content.Load<Texture2D>("Textures/Chest"));
@@ -84,6 +84,7 @@ public class Game1 : Game
         
         atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
         atlas.Save();
+        BlockTextureCoord.SetTextureCoords(atlas);
         
 
 
@@ -131,16 +132,9 @@ public class Game1 : Game
     private void CreateFaces()
     {
         List<FaceData> faces;
-        faces = new List<FaceData>();
-
-        Texture2D[] textures = new Texture2D[]
-        {
-            defaultTexture,
-            texture,
-            texture2
-        };
-        faces = world.GetVisibleFaces(textures);
-        Console.WriteLine($"Cubes: {faces.Count}");
+        
+        faces = world.GetVisibleFaces(atlas);
+        Console.WriteLine($"Faces: {faces.Count}");
         faceRenderer.UpdateInstances(faces);
     }
 
@@ -179,8 +173,8 @@ public class Game1 : Game
     private void HandleInput(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-        float moveSpeed = 7f;
-        float rotationSpeed = 0.25f;
+        float moveSpeed = 15f;
+        float rotationSpeed = 0.30f;
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);

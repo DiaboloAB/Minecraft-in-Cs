@@ -13,7 +13,7 @@ public class ChunkGenerator
     public ChunkGenerator(int seed)
     {
         // get random nbr
-        int random = new Random().Next();
+        int random = new Random().Next(0, 1000000);
         this.seed = random;
         
         noise.SetSeed(random);
@@ -29,18 +29,18 @@ public class ChunkGenerator
         Textures = new Texture2D[BlockType.GetValues(typeof(BlockType)).Length];
     }
     
-    public Chunk GenerateChunk(int x, int z)
+    public Chunk GenerateChunk(int x, int z, World world)
     {
         int width = Chunk.SIZE;
         int height = Chunk.HEIGHT;
 
-        Chunk chunk = new Chunk(new Vector3(x, 0, z));
+        Chunk chunk = new Chunk(new Vector3(x, 0, z), world);
         
         for (int i = 0; i < width; i++)
         {
             for (int k = 0; k < width; k++)
             {
-                int stoneHeight = (int)(noise.GetNoise((x + i) * 0.1f, (z + k) * 0.1f) * 10) + 10;
+                int stoneHeight = (int)(noise.GetNoise((x * Chunk.SIZE + i) * 0.1f, (z * Chunk.SIZE  + k) * 0.1f) * 10) + 10;
                 for (int j = 0; j < height; j++)
                 {
                     if (j < stoneHeight)

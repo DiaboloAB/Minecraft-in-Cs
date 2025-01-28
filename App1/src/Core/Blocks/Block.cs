@@ -2,6 +2,7 @@
 
 public class Block
 {
+    
     public int Type { get; }
     
     public Block(int type)

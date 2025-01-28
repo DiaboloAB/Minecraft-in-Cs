@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using App1.Graphics;
+using App1.Graphics.Textures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -13,10 +15,42 @@ public class Chunk
     private Vector3 position;
     public bool IsDirty = true;
     
-    public Chunk(Vector3 position)
+    private World world;
+    
+    public Chunk(Vector3 position, World world)
     {
+        this.world = world;
         this.position = position;
         blocks = new int[SIZE, HEIGHT, SIZE];
+    }
+    
+    public int GetBlockFromNeighboringChunks(int x, int y, int z)
+    {
+        
+        try
+        {
+            if (x < 0)
+            {
+                return world.GetChunk((int)position.X - 1, (int)position.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
+            }
+            if (x >= Chunk.SIZE)
+            {
+                return world.GetChunk((int)position.X + 1, (int)position.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
+            }
+            if (z < 0)
+            {
+                return world.GetChunk((int)position.X, (int)position.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
+            }
+            if (z >= Chunk.SIZE)
+            {
+                return world.GetChunk((int)position.X, (int)position.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
+            }
+            return GetBlock(new Vector3(x, y, z));
+        }
+        catch
+        {
+            return 0;
+        }
     }
     
     public int GetBlock(Vector3 pos)
@@ -37,6 +71,7 @@ public class Chunk
     public List<CubeData> getVisibleCubes(Texture2D[] textures)
     {
         List<CubeData> cubes = new List<CubeData>();
+        
         for (int x = 0; x < SIZE; x++)
         {
             for (int y = 0; y < HEIGHT; y++)
@@ -52,7 +87,7 @@ public class Chunk
                     
                     cubes.Add(new CubeData
                     {
-                        Position = blockPos + position,
+                        Position = blockPos + position * new Vector3(SIZE, HEIGHT, SIZE),
                         Scale = Vector3.One,
                         Texture = textures[1]
                     });
@@ -63,7 +98,7 @@ public class Chunk
         return cubes;
     }
 
-    public List<FaceData> getVisibleFaces(Texture2D[] textures)
+    public List<FaceData> getVisibleFaces(Atlas atlas)
     {
         List<FaceData> faces = new List<FaceData>();
         for (int x = 0; x < SIZE; x++)
@@ -77,14 +112,14 @@ public class Chunk
                     Vector3 blockPos = new Vector3(x, y, z);
 
                     int faceMask = CalculateFaceMask(x, y, z);
-                    if (faceMask == 0) continue;
 
                     for (int i = 0; i < 6; i++)
                     {
+                        if ((faceMask & (1 << i)) == 0) continue;
                         faces.Add(new FaceData
                         {
-                            Position = blockPos + position,
-                            TexCoord = new Vector2(0, 0),
+                            Position = blockPos + position * new Vector3(SIZE, HEIGHT, SIZE),
+                            TexCoord = BlockTextureCoord.TextureCoords[blockType][i],
                             Orientation = (short)i
                         });
                     }
@@ -100,13 +135,18 @@ public class Chunk
     private int CalculateFaceMask(int x, int y, int z)
     {
         int mask = 0b111111;
-        
-        if (GetBlock(new Vector3(x, y + 1, z)) != 0) mask &= 0b111110;
-        if (GetBlock(new Vector3(x, y - 1, z)) != 0) mask &= 0b111101;
-        if (GetBlock(new Vector3(x + 1, y, z)) != 0) mask &= 0b111011;
-        if (GetBlock(new Vector3(x - 1, y, z)) != 0) mask &= 0b110111;
-        if (GetBlock(new Vector3(x, y, z + 1)) != 0) mask &= 0b101111;
-        if (GetBlock(new Vector3(x, y, z - 1)) != 0) mask &= 0b011111;
+        //front
+        if (GetBlockFromNeighboringChunks(x, y, z + 1) != 0) mask &= 0b111110;
+        //back
+        if (GetBlockFromNeighboringChunks(x, y, z - 1) != 0) mask &= 0b111101;
+        //top
+        if (GetBlockFromNeighboringChunks(x, y + 1, z) != 0) mask &= 0b111011;
+        //bottom
+        if (GetBlockFromNeighboringChunks(x, y - 1, z) != 0) mask &= 0b110111;
+        //left
+        if (GetBlockFromNeighboringChunks(x - 1, y, z) != 0) mask &= 0b101111;
+        //right
+        if (GetBlockFromNeighboringChunks(x + 1, y, z) != 0) mask &= 0b011111;
         
         
         
