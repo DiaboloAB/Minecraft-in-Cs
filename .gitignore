@@ -1,0 +1,13 @@
+﻿# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+.idea/
+.vs/
+*.csproj.user
+*.csproj.DotSettings
+*.csproj.DotSettings.user
