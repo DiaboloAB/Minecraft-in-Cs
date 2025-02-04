@@ -39,7 +39,7 @@ public class Chunk
         short index = 0;
         for (int x = 0; x < SIZE; x++)
         {
-            for (int y = 40; y < HEIGHT; y++)
+            for (int y = 0; y < HEIGHT; y++)
             {
                 for (int z = 0; z < SIZE; z++)
                 {
@@ -57,7 +57,6 @@ public class Chunk
 
         IndexBuffer = new IndexBuffer(graphicsDevice, IndexElementSize.SixteenBits, indices.Count, BufferUsage.WriteOnly);
         IndexBuffer.SetData(indices.ToArray());
-        Console.WriteLine($"Vertices: {vertices.Count}, Indices: {indices.Count}");
     }
     
     private void AddCubeVertices(int blockType, List<VertexPositionTexture> vertices, List<short> indices, Vector3 position, Vector3 blockPosChunk, ref short index)

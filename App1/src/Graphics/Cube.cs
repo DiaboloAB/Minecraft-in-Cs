@@ -43,50 +43,50 @@ public class Cube
     {
         new Vector3[] 
         {
-            new Vector3(-0.5f,  0.5f,  0.5f),
             new Vector3( 0.5f,  0.5f,  0.5f),
             new Vector3( 0.5f, -0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f,  0.5f)
+            new Vector3(-0.5f, -0.5f,  0.5f),
+            new Vector3(-0.5f,  0.5f,  0.5f),
         },
         // Back face
         new Vector3[]
         {
-            new Vector3( 0.5f,  0.5f, -0.5f),
             new Vector3(-0.5f,  0.5f, -0.5f),
             new Vector3(-0.5f, -0.5f, -0.5f),
-            new Vector3( 0.5f, -0.5f, -0.5f)
+            new Vector3( 0.5f, -0.5f, -0.5f),
+            new Vector3( 0.5f,  0.5f, -0.5f),
         },
         // Top face
         new Vector3[]
         {
-            new Vector3(-0.5f,  0.5f, -0.5f),
             new Vector3( 0.5f,  0.5f, -0.5f),
             new Vector3( 0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f,  0.5f,  0.5f)
+            new Vector3(-0.5f,  0.5f,  0.5f),
+            new Vector3(-0.5f,  0.5f, -0.5f),
         },
         // Bottom face
         new Vector3[]
         {
-            new Vector3(-0.5f, -0.5f,  0.5f),
             new Vector3( 0.5f, -0.5f,  0.5f),
             new Vector3( 0.5f, -0.5f, -0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f)
+            new Vector3(-0.5f, -0.5f, -0.5f),
+            new Vector3(-0.5f, -0.5f,  0.5f),
         },
         // Left face
         new Vector3[]
         {
-            new Vector3(-0.5f,  0.5f, -0.5f),
             new Vector3(-0.5f,  0.5f,  0.5f),
             new Vector3(-0.5f, -0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f)
+            new Vector3(-0.5f, -0.5f, -0.5f),
+            new Vector3(-0.5f,  0.5f, -0.5f),
         },
         // Right face
         new Vector3[]
         {
-            new Vector3(0.5f,  0.5f,  0.5f),
             new Vector3(0.5f,  0.5f, -0.5f),
             new Vector3(0.5f, -0.5f, -0.5f),
-            new Vector3(0.5f, -0.5f,  0.5f)
+            new Vector3(0.5f, -0.5f,  0.5f),
+            new Vector3(0.5f,  0.5f,  0.5f),
         }
     };
     

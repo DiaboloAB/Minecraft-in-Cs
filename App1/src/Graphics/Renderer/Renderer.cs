@@ -33,28 +33,52 @@ public class Renderer
         projection = camera.Projection;
     }
     
-    public void DrawWorld(World world)
+    public void DrawWorld(World world, Vector3 position, int radius)
     {
         graphicsDevice.DepthStencilState = DepthStencilState.Default;
         effect.Parameters["View"].SetValue(view);
         effect.Parameters["Projection"].SetValue(projection);
         
         
-        foreach (var chunk in world.Chunks)
+        for (int i = (int)position.X - radius; i < position.Z + radius; i++)
         {
-            graphicsDevice.SetVertexBuffer(chunk.VertexBuffer);
-            graphicsDevice.Indices = chunk.IndexBuffer;
-            
-            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            for (int j = (int)position.Z - radius; j < position.Z + radius; j++)
             {
-                pass.Apply();
-                graphicsDevice.DrawIndexedPrimitives(
-                    PrimitiveType.TriangleList,
-                    0,
-                    0,
-                    chunk.IndexCount
-                );
+                if (world.chunks.ContainsKey((i, j)))
+                {
+                    var chunk = world.GetChunk(i, j);
+                    graphicsDevice.SetVertexBuffer(chunk.VertexBuffer);
+                    graphicsDevice.Indices = chunk.IndexBuffer;
+                    
+                    foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        graphicsDevice.DrawIndexedPrimitives(
+                            PrimitiveType.TriangleList,
+                            0,
+                            0,
+                            chunk.IndexCount
+                        );
+                    }
+                }
             }
         }
+        
+        // foreach (var chunk in world.Chunks)
+        // {
+        //     graphicsDevice.SetVertexBuffer(chunk.VertexBuffer);
+        //     graphicsDevice.Indices = chunk.IndexBuffer;
+        //     
+        //     foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+        //     {
+        //         pass.Apply();
+        //         graphicsDevice.DrawIndexedPrimitives(
+        //             PrimitiveType.TriangleList,
+        //             0,
+        //             0,
+        //             chunk.IndexCount
+        //         );
+        //     }
+        // }
     }
 }

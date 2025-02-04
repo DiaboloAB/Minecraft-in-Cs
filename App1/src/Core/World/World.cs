@@ -1,8 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Numerics;
 using App1.Graphics;
 using App1.Graphics.Textures;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace App1.Core.World;
@@ -10,8 +9,10 @@ namespace App1.Core.World;
 public class World
 {
     private ChunkGenerator chunkGenerator;
-    private Dictionary<(int, int), Chunk> chunks;
-    private Vector2 worldSize = new Vector2(1, 1);
+    public Dictionary<(int, int), Chunk> chunks;
+    private Vector2 worldSize = new Vector2(40, 40);
+    
+    private int seed;
     public World(int seed)
     {
         chunkGenerator = new ChunkGenerator(seed);
@@ -32,6 +33,11 @@ public class World
     public Chunk GetChunk(int x, int z)
     {
         return chunks[(x, z)];
+    }
+    
+    public Vector3 GetChunkPosition(Vector3 position)
+    {
+        return new Vector3((int)position.X / Chunk.SIZE, 0, (int)position.Z / Chunk.SIZE);
     }
     
     public int GetBlock(int x, int y, int z)
@@ -62,6 +68,22 @@ public class World
         return cubes;
     }
     
+    public void GenerateChunks(int x, int z, int radius)
+    {
+        for (int i = -radius; i < radius; i++)
+        {
+            for (int j = -radius; j < radius; j++)
+            {
+                if (!chunks.ContainsKey((x + i, z + j)))
+                {
+                    var chunk = chunkGenerator.GenerateChunk(x + i, z + j, this);
+                    chunks[(x + i, z + j)] = chunk;
+                    chunkGenerator.GenerateTrees(chunk, x + i, z + j, this);
+                }
+            }
+        }
+    }
+    
     public List<FaceData> GetVisibleFaces(Atlas atlas)
     {
         List<FaceData> cubes = new List<FaceData>();
@@ -85,13 +107,5 @@ public class World
         }
             
     }
-
-    public IEnumerable<Chunk> Chunks
-    {
-        get
-        {
-            foreach (var chunk in chunks.Values)
-                yield return chunk;
-        }
-    }
+    
 }

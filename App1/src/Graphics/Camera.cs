@@ -113,4 +113,10 @@ public class Camera
         UpdateViewMatrix();
     }
     
+    public void SetPosition(Vector3 position)
+    {
+        Position = position;
+        UpdateViewMatrix();
+    }
+    
 }
