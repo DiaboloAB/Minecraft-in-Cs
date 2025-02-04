@@ -21,12 +21,12 @@ public class FaceRenderer
     Texture2D cubeTexture;
     private readonly GraphicsDevice graphicsDevice;
     private readonly Effect effect;
-    private IndexBuffer indexBuffer;
-    private VertexBuffer instanceBuffer;
 
     private Matrix view;
     private Matrix projection;
 
+    private IndexBuffer indexBuffer;
+    private VertexBuffer instanceBuffer;
     private VertexBuffer[] vertexBuffer;
     private List<InstanceData>[] facesInstances;
     private Texture2D textureAtlas;

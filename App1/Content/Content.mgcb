@@ -28,6 +28,12 @@
 /processorParam:DebugMode=Auto
 /build:Effects/InstancedEffect.fx
 
+#begin Effects/VertexEffect.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:Effects/VertexEffect.fx
+
 #begin Fonts/File.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor

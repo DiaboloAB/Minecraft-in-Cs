@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using App1.Graphics;
 using App1.Graphics.Textures;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Vector3 = Microsoft.Xna.Framework.Vector3;
+using Vector2 = Microsoft.Xna.Framework.Vector2;
+using VertexPositionTexture = App1.Graphics.VertexPositionTexture;
 
 namespace App1.Core.World;
 
@@ -17,11 +19,77 @@ public class Chunk
     
     private World world;
     
+    // public 
+    public VertexBuffer VertexBuffer;
+    public IndexBuffer IndexBuffer;
+    public int IndexCount;
+    
     public Chunk(Vector3 position, World world)
     {
         this.world = world;
         this.position = position;
         blocks = new int[SIZE, HEIGHT, SIZE];
+    }
+    
+    public void CreateBuffers(GraphicsDevice graphicsDevice)
+    {
+        List<VertexPositionTexture> vertices = new List<VertexPositionTexture>();
+        List<short> indices = new List<short>();
+
+        short index = 0;
+        for (int x = 0; x < SIZE; x++)
+        {
+            for (int y = 40; y < HEIGHT; y++)
+            {
+                for (int z = 0; z < SIZE; z++)
+                {
+                    int blockType = blocks[x, y, z];
+                    if (blockType == 0) continue;
+                    
+                    Vector3 blockPos = new Vector3(x, y, z) + position * new Vector3(SIZE, HEIGHT, SIZE);
+                    AddCubeVertices(blockType, vertices, indices, blockPos, new Vector3(x, y, z), ref index);
+                }
+            }
+        }
+        
+        VertexBuffer = new VertexBuffer(graphicsDevice, VertexPositionTexture.VertexDeclaration, vertices.Count, BufferUsage.WriteOnly);
+        VertexBuffer.SetData(vertices.ToArray());
+
+        IndexBuffer = new IndexBuffer(graphicsDevice, IndexElementSize.SixteenBits, indices.Count, BufferUsage.WriteOnly);
+        IndexBuffer.SetData(indices.ToArray());
+        Console.WriteLine($"Vertices: {vertices.Count}, Indices: {indices.Count}");
+    }
+    
+    private void AddCubeVertices(int blockType, List<VertexPositionTexture> vertices, List<short> indices, Vector3 position, Vector3 blockPosChunk, ref short index)
+    {
+        
+        if (blockPosChunk.X > 15)
+        {
+            Console.WriteLine("blockPosChunk: " + blockPosChunk);
+        }
+        int faceMask = CalculateFaceMask((int)blockPosChunk.X, (int)blockPosChunk.Y, (int)blockPosChunk.Z);
+        
+        for (int i = 0; i < 6; i++)
+        {
+            if ((faceMask & (1 << i)) == 0) continue;
+            Vector2 texCoord = BlockTextureCoord.TextureCoords[blockType][i];
+            
+            vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][0], texCoord / 2048.0f));
+            vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][1], (texCoord + new Vector2(0, 16)) / 2048.0f));
+            vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][2], (texCoord + new Vector2(16, 16)) / 2048.0f));
+            vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][3], (texCoord + new Vector2(16, 0)) / 2048.0f));
+            
+            indices.Add(index);
+            indices.Add((short)(index + 1));
+            indices.Add((short)(index + 2));
+            indices.Add(index);
+            indices.Add((short)(index + 2));
+            indices.Add((short)(index + 3));
+            
+            index += 4;
+        }
+     
+        IndexCount = index;
     }
     
     public int GetBlockFromNeighboringChunks(int x, int y, int z)

@@ -47,11 +47,11 @@ public class ChunkGenerator
                 int stoneHeight = (int)(noise.GetNoise((x * Chunk.SIZE + i) * 0.1f, (z * Chunk.SIZE  + k) * 0.1f) * 10) + 50;
                 for (int j = 0; j < height; j++)
                 {
-                    float caveValue = caveNoise.GetNoise((x * Chunk.SIZE + i) * 0.1f, j * 0.1f, (z * Chunk.SIZE + k) * 0.1f);
-
-                    // Tunneling algorithm to create long caves
-                    if (caveValue > 0.5f && IsTunnel(x * Chunk.SIZE + i, j, z * Chunk.SIZE + k))
-                        continue;
+                    // float caveValue = caveNoise.GetNoise((x * Chunk.SIZE + i) * 0.1f, j * 0.1f, (z * Chunk.SIZE + k) * 0.1f);
+                    //
+                    // // Tunneling algorithm to create long caves
+                    // if (caveValue > 0.5f && IsTunnel(x * Chunk.SIZE + i, j, z * Chunk.SIZE + k))
+                    //     continue;
                     
                     // 1 block of grass, 2 block of dirt, rest with stone
                     if (j == stoneHeight)

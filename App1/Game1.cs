@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using App1.Core.World;
 using App1.Graphics;
+using App1.Graphics.Renderer;
 using App1.Graphics.Textures;
 using App1.Utils;
 using Microsoft.Xna.Framework;
@@ -26,6 +27,7 @@ public class Game1 : Game
     
     private CubeRenderer cubeRenderer;
     private FaceRenderer faceRenderer;
+    private Renderer renderer;
     
     private ChunkGenerator chunkGenerator;
     
@@ -34,13 +36,16 @@ public class Game1 : Game
     private Chunk[] chunks;
     
     private double fps = 0;
-    private List<double> fpsList = new List<double>();
+    private double fpsTimer = 0;
     
     ContentManager content => Content;
     
     Texture2D crosshair;
     
     Atlas atlas;
+    
+    bool debug = false;
+    bool debugSwitch = false;
 
     public Game1()
     {
@@ -48,8 +53,10 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";                 
         // IsMouseVisible = false;
-        _graphics.SynchronizeWithVerticalRetrace = true;
+        _graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
+        IsFixedTimeStep = true;
+        TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60);
 
     }
 
@@ -60,15 +67,17 @@ public class Game1 : Game
         
         // Effect effect;
         Effect effectbis;
+        Effect vertexEffect;
         try
         {
             // effect = content.Load<Effect>("Effects/InstancedEffect");
             effectbis = content.Load<Effect>("Effects/FaceEffect");
-            Console.WriteLine("Effect loaded successfully.");
+            vertexEffect = Content.Load<Effect>("Effects/VertexEffect");
+            Console.WriteLine("All Effects loaded successfully.");
         }
         catch (ContentLoadException e)
         {
-            throw new ContentLoadException("Failed to load InstancedEffect. Make sure the .fx file is properly added to the Content project.", e);
+            throw new ContentLoadException("Failed to load 1 Effect. Make sure the .fx file is properly added to the Content project.", e);
         }
         texture = content.Load<Texture2D>("Textures/Grass");
         texture2 = content.Load<Texture2D>("Textures/Stone");
@@ -101,9 +110,14 @@ public class Game1 : Game
         faceRenderer = new FaceRenderer(GraphicsDevice, effectbis, camera, 16f / 2048f, 50000);
         faceRenderer.SetAtlasTexture(atlas.Texture);
         
+
+        renderer = new Renderer(GraphicsDevice, vertexEffect);
+        renderer.SetAtlasTexture(atlas.Texture);
         // CreateTestCubes();
         // CreateTestChests();
         CreateFaces();
+        
+        world.CreateChunksBuffers(GraphicsDevice);
         
         base.Initialize();
     }
@@ -145,8 +159,6 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-        // TODO: use this.Content to load your game content here
     }
 
     protected override void Update(GameTime gameTime)
@@ -156,29 +168,23 @@ public class Game1 : Game
             Exit();
 
         HandleInput(gameTime);
-        
-        fpsList.Add(1 / gameTime.ElapsedGameTime.TotalSeconds);
-        
-        if (fpsList.Count > 10)
+
+
+        fpsTimer += gameTime.ElapsedGameTime.TotalSeconds;
+        if (fpsTimer > 0.5f)
         {
-            fpsList.RemoveAt(0);
+            fps = 1 / gameTime.ElapsedGameTime.TotalSeconds;
+            fpsTimer = 0;
         }
-        double sum = 0;
-        foreach (var f in fpsList)
-            sum += f;
-        
-        fps = sum / fpsList.Count;
-        
-        
-        
+
         base.Update(gameTime);
     }
     
     private void HandleInput(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-        float moveSpeed = 15f;
-        float rotationSpeed = 0.30f;
+        float moveSpeed = 25f;
+        float rotationSpeed = 0.4f;
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
@@ -205,6 +211,20 @@ public class Game1 : Game
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         // cubeRenderer.UpdateViewProjection(camera);
         faceRenderer.UpdateViewProjection(camera);
+        renderer.UpdateViewProjection(camera);
+        
+        if (keyboardState.IsKeyDown(Keys.F1) && !debugSwitch)
+        {
+            debugSwitch = true;
+            debug = !debug;
+            if (debug)
+                    Console.WriteLine("Debug mode enabled.");
+            else
+                Console.WriteLine("Debug mode disabled.");
+            
+        }
+        if (keyboardState.IsKeyUp(Keys.F1))
+            debugSwitch = false;
     }
 
     protected override void Draw(GameTime gameTime)
@@ -212,7 +232,9 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         
         // cubeRenderer.Draw();
-        faceRenderer.Draw();
+        if (debug)
+            faceRenderer.Draw();
+        renderer.DrawWorld(world);
         Vector3 camRotation = camera.Rotation;
         orientationGraph.DrawOrientationGraph(camera);
         
