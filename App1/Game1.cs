@@ -116,8 +116,6 @@ public class Game1 : Game
         // CreateTestChests();
         CreateFaces();
         
-        world.CreateChunksBuffers(GraphicsDevice);
-        
         base.Initialize();
     }
     
@@ -165,6 +163,10 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+        
+        world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 16);
+        world.CreateChunksBuffers(GraphicsDevice);
+
         
         player.Update(gameTime);
         HandleInput(gameTime);

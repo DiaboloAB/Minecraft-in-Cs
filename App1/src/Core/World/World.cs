@@ -15,19 +15,20 @@ public class World
     private int seed;
     public World(int seed)
     {
+        this.seed = seed;
         chunkGenerator = new ChunkGenerator(seed);
         chunks = new Dictionary<(int, int), Chunk>();
-        for (int x = 0; x < worldSize.X; x++)
-        {
-            for (int z = 0; z < worldSize.Y; z++)
-            {
-                var chunk = chunkGenerator.GenerateChunk(x, z, this);
-                chunks[(x, z)] = chunk;
-            }
-        }
-        for (int x = 0; x < worldSize.X; x++)
-            for (int z = 0; z < worldSize.Y; z++)
-                chunkGenerator.GenerateTrees(chunks[(x, z)], x, z, this);
+        // for (int x = 0; x < worldSize.X; x++)
+        // {
+        //     for (int z = 0; z < worldSize.Y; z++)
+        //     {
+        //         var chunk = chunkGenerator.GenerateChunk(x, z, this);
+        //         chunks[(x, z)] = chunk;
+        //     }
+        // }
+        // for (int x = 0; x < worldSize.X; x++)
+        //     for (int z = 0; z < worldSize.Y; z++)
+        //         chunkGenerator.GenerateTrees(chunks[(x, z)], x, z, this);
     }
     
     public Chunk GetChunk(int x, int z)
@@ -55,7 +56,8 @@ public class World
         int chunkZ = z / Chunk.SIZE;
         if (!(chunkX < worldSize.X && chunkZ < worldSize.Y))
             return;
-
+        if (!chunks.ContainsKey((chunkX, chunkZ)))
+            return;
         chunks[(chunkX, chunkZ)].SetBlock(x % Chunk.SIZE, y, z % Chunk.SIZE, type);
     }
     
@@ -68,17 +70,18 @@ public class World
         return cubes;
     }
     
-    public void GenerateChunks(int x, int z, int radius)
+    public void GenerateChunks(Vector3 position, int radius)
     {
-        for (int i = -radius; i < radius; i++)
+        for (int i = (int)(position.X - radius); i < position.Z + radius; i++)
         {
-            for (int j = -radius; j < radius; j++)
+            for (int j = (int)(position.Z - radius); j < position.Z + radius; j++)
             {
-                if (!chunks.ContainsKey((x + i, z + j)))
+                if (!chunks.ContainsKey((i, j)))
                 {
-                    var chunk = chunkGenerator.GenerateChunk(x + i, z + j, this);
-                    chunks[(x + i, z + j)] = chunk;
-                    chunkGenerator.GenerateTrees(chunk, x + i, z + j, this);
+                    var chunk = chunkGenerator.GenerateChunk(i, j, this);
+                    chunks[(i, j)] = chunk;
+                    chunk.IsDirty = true;
+                    chunkGenerator.GenerateTrees(chunk, i, j, this);
                 }
             }
         }
@@ -101,6 +104,7 @@ public class World
             {
                 // Console.WriteLine("Creating chunk buffers");
                 chunk.CreateBuffers(graphicsDevice);
+                chunk.IsDirty = false;
             }
 
                 

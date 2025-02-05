@@ -40,9 +40,9 @@ public class Renderer
         effect.Parameters["Projection"].SetValue(projection);
         
         
-        for (int i = (int)position.X - radius; i < position.Z + radius; i++)
+        for (int i = (int)(position.X - radius); i < position.Z + radius; i++)
         {
-            for (int j = (int)position.Z - radius; j < position.Z + radius; j++)
+            for (int j = (int)(position.Z - radius); j < position.Z + radius; j++)
             {
                 if (world.chunks.ContainsKey((i, j)))
                 {
