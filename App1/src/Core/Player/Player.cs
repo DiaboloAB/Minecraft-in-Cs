@@ -7,8 +7,12 @@ namespace App1.Core.Player;
 
 public class Player
 {
+    public float moveSpeed = 25f;
     public Vector3 position = new Vector3(0, 0, 0);
     public Vector3 rotation = new Vector3(0, 0, 0);
+    
+    private int previousScrollValue;
+
 
     public readonly Camera Camera;
     
@@ -33,12 +37,18 @@ public class Player
     private void HandleInput(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-        float moveSpeed = 25f;
         float rotationSpeed = 0.4f;
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
 
+
+        moveSpeed += mouseState.ScrollWheelValue - previousScrollValue;
+        previousScrollValue = mouseState.ScrollWheelValue;
+        
+        
+        
+        
         if (keyboardState.IsKeyDown(Keys.Z))
             move.Z += moveSpeed;
         if (keyboardState.IsKeyDown(Keys.S))
@@ -69,7 +79,8 @@ public class Player
         if ( mouseDelta != Vector2.Zero)
             Camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0) * (float)gameTime.ElapsedGameTime.TotalSeconds);
         
-        lastMousePosition = new Vector2(mouseState.X, mouseState.Y);
+        // lastMousePosition = new Vector2(mouseState.X, mouseState.Y);
+        Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
     }
     
     public Vector3 GetPosition()

@@ -70,6 +70,8 @@ public class ChunkGenerator
             }
             
         }
+
+        chunk.Generated = true;
         return chunk;
 
     }

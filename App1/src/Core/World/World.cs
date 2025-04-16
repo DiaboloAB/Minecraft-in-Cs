@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using App1.Graphics;
 using App1.Graphics.Textures;
 using Microsoft.Xna.Framework;
@@ -11,13 +14,25 @@ public class World
     private ChunkGenerator chunkGenerator;
     public Dictionary<(int, int), Chunk> chunks;
     private Vector2 worldSize = new Vector2(40, 40);
+
+    private GraphicsDevice _graphicsDevice;
     
     private int seed;
-    public World(int seed)
+
+    object worldLock = new();
+
+    public PriorityQueue<(int, int), int> chunkQueue;
+    public PriorityQueue<(int, int), int> chunkBufferQueue;
+    
+    public World(int seed, GraphicsDevice graphicsDevice)
     {
+        _graphicsDevice = graphicsDevice;
         this.seed = seed;
         chunkGenerator = new ChunkGenerator(seed);
         chunks = new Dictionary<(int, int), Chunk>();
+        chunkQueue = new PriorityQueue<(int, int), int>();
+        
+        chunkBufferQueue = new PriorityQueue<(int, int), int>();
         // for (int x = 0; x < worldSize.X; x++)
         // {
         //     for (int z = 0; z < worldSize.Y; z++)
@@ -29,6 +44,90 @@ public class World
         // for (int x = 0; x < worldSize.X; x++)
         //     for (int z = 0; z < worldSize.Y; z++)
         //         chunkGenerator.GenerateTrees(chunks[(x, z)], x, z, this);
+        Task.Run(Worker);
+        Task.Run(BufferWorker);
+    }
+
+    void Worker()
+    {
+        while (true)
+        {
+            List<(int, int)> batch = new List<(int, int)>();
+
+            lock (chunkQueue)
+            {
+                if (chunkQueue.Count > 0)
+                {
+                    var ch = chunkQueue.Dequeue();
+                    batch.Add(ch);
+                }
+            }
+            
+            foreach (var item in batch)
+            {
+                // Console.WriteLine($"Processing chunk: ({item.Item1}, {item.Item2})");
+            }
+
+            Parallel.ForEach(batch, chunk =>
+            {
+                var generatedChunk = chunkGenerator.GenerateChunk(chunk.Item1, chunk.Item2, this);
+                StoreGeneratedChunk(chunk.Item1, chunk.Item2, generatedChunk);
+            });
+
+            Thread.Sleep(10);
+        }
+    }
+
+    void BufferWorker()
+    {
+        while (true)
+        {
+            try
+            {
+                
+                List<(int, int)> batch = new List<(int, int)>();
+
+                lock (chunkBufferQueue)
+                {
+                    Console.WriteLine($"BufferWorker: {chunkBufferQueue.Count}");
+                    if (chunkBufferQueue.Count > 0)
+                    {
+                        var ch = chunkBufferQueue.Dequeue();
+                        batch.Add(ch);
+                    }
+                }
+                
+                // foreach (var item in batch)
+                // {
+                //     Console.WriteLine($"Rendering chunk: ({item.Item1}, {item.Item2})");
+                // }
+
+                Parallel.ForEach(batch, chunk =>
+                {
+                    lock (worldLock) // Synchronize access to chunks
+                    {
+                        if (chunks.ContainsKey(chunk))
+                        {
+                            chunks[chunk].CreateBuffers(_graphicsDevice);
+                            chunks[chunk].HasMeshDataRdy = true;
+                        }
+                    }
+                });
+
+                Thread.Sleep(10);
+            } catch (Exception e)
+            {
+                Console.WriteLine($"BufferWorker error: {e.Message}");
+            }
+        }
+    }
+
+    void StoreGeneratedChunk(int x, int z, Chunk chunk)
+    {
+        lock (worldLock)
+        {
+            chunks[(x, z)] = chunk;
+        }
     }
     
     public Chunk GetChunk(int x, int z)
@@ -72,16 +171,19 @@ public class World
     
     public void GenerateChunks(Vector3 position, int radius)
     {
-        for (int i = (int)(position.X - radius); i < position.Z + radius; i++)
+        for (int i = (int)(position.X - radius); i < (int)(position.X + radius); i++)
         {
-            for (int j = (int)(position.Z - radius); j < position.Z + radius; j++)
+            for (int j = (int)(position.Z - radius); j < (int)(position.Z + radius); j++)
             {
                 if (!chunks.ContainsKey((i, j)))
                 {
-                    var chunk = chunkGenerator.GenerateChunk(i, j, this);
-                    chunks[(i, j)] = chunk;
-                    chunk.IsDirty = true;
-                    chunkGenerator.GenerateTrees(chunk, i, j, this);
+                    int distance = (int)Vector3.Distance(position, new Vector3(i, 0, j));
+                    // var chunk = chunkGenerator.GenerateChunk(i, j, this);
+                    chunks[(i, j)] = new Chunk(new Vector3(i, 0, j), this);
+                    chunkQueue.Enqueue((i, j), Math.Abs(
+                        distance));
+                    // chunk.IsDirty = true; 
+                    // chunkGenerator.GenerateTrees(chunk, i, j, this);
                 }
             }
         }
@@ -95,15 +197,17 @@ public class World
         return cubes;
     }
     
-    public void CreateChunksBuffers(GraphicsDevice graphicsDevice)
+    public void CreateChunksBuffers(Vector3 position, int radius)
     {
         // Console.WriteLine("Creating chunks buffers");
         foreach (var chunk in chunks.Values)
         {
-            if (chunk.IsDirty)
+            if (chunk.IsDirty && chunk.Generated)
             {
-                // Console.WriteLine("Creating chunk buffers");
-                chunk.CreateBuffers(graphicsDevice);
+                int distance = (int)Vector3.Distance(position, new Vector3((int)chunk.position.X, 0, (int)chunk.position.Z));
+                chunkBufferQueue.Enqueue(((int)chunk.position.X, (int)chunk.position.Z), Math.Abs(
+                    distance));
+                chunk.HasMeshDataRdy = false;
                 chunk.IsDirty = false;
             }
 

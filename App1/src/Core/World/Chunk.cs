@@ -16,8 +16,13 @@ public class Chunk
     private readonly int [,,] blocks;
     public Vector3 position;
     public bool IsDirty = true;
+    public bool Generated = false;
+    public bool Processing = false;
     
     private World world;
+    
+    public volatile bool HasMeshDataRdy = false;
+    
     
     // public 
     public VertexBuffer VertexBuffer;

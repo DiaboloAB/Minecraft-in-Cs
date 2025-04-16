@@ -50,7 +50,6 @@ public class Game1 : Game
 
     public Game1()
     {
-        world = new World(467465678);
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";                 
         // IsMouseVisible = false;
@@ -63,6 +62,7 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        world = new World(467465678, GraphicsDevice);
         player = new Player(GraphicsDevice);
         
         // Effect effect;
@@ -102,8 +102,8 @@ public class Game1 : Game
 
         
         
-        _graphics.PreferredBackBufferWidth = 1920;
-        _graphics.PreferredBackBufferHeight = 1080;
+        _graphics.PreferredBackBufferWidth = 1920 / 2;
+        _graphics.PreferredBackBufferHeight = 1080 / 2;
         _graphics.ApplyChanges();
         // cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
         // faceRenderer = new FaceRenderer(GraphicsDevice, effectbis, player.Camera, 16f / 2048f, 50000);
@@ -164,8 +164,8 @@ public class Game1 : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
         
-        world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 16);
-        world.CreateChunksBuffers(GraphicsDevice);
+        world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 4);
+        world.CreateChunksBuffers(player.GetPosition(), 4);
 
         
         player.Update(gameTime);
@@ -218,6 +218,10 @@ public class Game1 : Game
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) player.Camera.Position.X}, {(int) player.Camera.Position.Y}, {(int) player.Camera.Position.Z}", new Vector2(10, 50), Color.White);
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "moveSpeed: " + player.moveSpeed, new Vector2(10, 90), Color.White);
+        //chunk pos
+        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.GetPosition())}", new Vector2(10, 110), Color.White);
+        
         _spriteBatch.Draw(
             crosshair, 
             new Vector2(GraphicsDevice.Viewport.Width / 2 - crosshair.Width, GraphicsDevice.Viewport.Height / 2 - crosshair.Height), 

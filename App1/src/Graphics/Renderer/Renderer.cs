@@ -47,6 +47,8 @@ public class Renderer
                 if (world.chunks.ContainsKey((i, j)))
                 {
                     var chunk = world.GetChunk(i, j);
+                    if (!chunk.HasMeshDataRdy || !chunk.Generated)
+                        continue;
                     graphicsDevice.SetVertexBuffer(chunk.VertexBuffer);
                     graphicsDevice.Indices = chunk.IndexBuffer;
                     
