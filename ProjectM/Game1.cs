@@ -213,6 +213,7 @@ public class Game1 : Game
         
         // cubeRenderer.Draw();
         renderer.DrawWorld(world, world.GetChunkPosition(player.GetPosition()), 16);
+        player.Draw();
         Vector3 camRotation = player.Camera.Rotation;
         orientationGraph.DrawOrientationGraph(player.Camera);
         chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);

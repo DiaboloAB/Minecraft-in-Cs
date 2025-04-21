@@ -32,6 +32,7 @@ public class Player
     
     CameraMode cameraMode = CameraMode.FirstPerson;
     
+    TmpPlayerRenderer tmpPlayerRenderer;
     
     public Player(GraphicsDevice graphicsDevice)
     {
@@ -43,6 +44,8 @@ public class Player
         Camera.Position = Position;
         lastMousePosition = new Vector2(graphicsDevice.Viewport.Width / 2, graphicsDevice.Viewport.Height / 2);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
+        
+        tmpPlayerRenderer = new TmpPlayerRenderer(graphicsDevice);
     }
     
     public void Update(GameTime gameTime, World.World world)
@@ -78,12 +81,14 @@ public class Player
         }
         else
         {
+            //minecraft like third person camera
+            // camera 3meter behind the player base camera, fixing the player head
+            Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, 0);
+            Vector3 rotatedOffset = Vector3.Transform(new Vector3(0, 0, -3), rotationMatrix);
             Camera.SetPosition(
-                Position + new Vector3(
-                    (float)Math.Sin(Rotation.Y) * 5,
-                    1.5f,
-                    (float)Math.Cos(Rotation.Y) * 5)
-                );
+                Position - rotatedOffset
+            );
+                
 
         }
 
@@ -198,6 +203,19 @@ public class Player
     public Vector3 GetPosition()
     {
         return Position;
+    }
+    
+    public void Draw()
+    {
+        tmpPlayerRenderer.UpdateViewProjection(Camera);
+        if (cameraMode != CameraMode.FirstPerson)
+        {
+            tmpPlayerRenderer.Draw(
+                Position,
+                Size
+            );
+        }
+        
     }
 }
 
