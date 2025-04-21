@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
-using App1.Core.Block;
-using App1.Core.World;
+using ProjectM.Core.Block;
+using ProjectM.Core.World;
 
-namespace App1.Graphics;
+namespace ProjectM.Graphics;
 
 public class ChunkMeshBuilder
 {

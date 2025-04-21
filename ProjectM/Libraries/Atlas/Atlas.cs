@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Graphics.Textures;
+namespace ProjectM.Graphics.Textures;
 
 public class Atlas
 {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace App1.Core.Block;
+namespace ProjectM.Core.Block;
 
 public class BlockModel
 {

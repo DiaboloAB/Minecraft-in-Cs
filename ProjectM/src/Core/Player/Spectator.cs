@@ -1,9 +1,9 @@
-using App1.Graphics;
+using ProjectM.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace App1.Core.Player;
+namespace ProjectM.Core.Player;
 
 public class Spectator
 {

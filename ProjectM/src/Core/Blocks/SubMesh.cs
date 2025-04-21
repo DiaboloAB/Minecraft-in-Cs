@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Core.Block;
+namespace ProjectM.Core.Block;
 
 public class SubMesh
 {

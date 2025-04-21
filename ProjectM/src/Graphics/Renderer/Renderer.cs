@@ -1,10 +1,10 @@
 using System;
 using System.Reflection.Metadata;
-using App1.Core.World;
+using ProjectM.Core.World;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Graphics.Renderer;
+namespace ProjectM.Graphics.Renderer;
 
 public class Renderer
 {

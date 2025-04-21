@@ -1,7 +1,7 @@
-using App1.Graphics.Textures;
+using ProjectM.Graphics.Textures;
 using Microsoft.Xna.Framework;
 
-namespace App1.Core.World;
+namespace ProjectM.Core.World;
 
 public class BlockTextureCoord
 {

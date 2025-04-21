@@ -1,5 +1,5 @@
 using System;
-using App1.Graphics;
+using ProjectM.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,7 +7,7 @@ using Vector2 = System.Numerics.Vector2;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 using VertexPosition = Microsoft.Xna.Framework.Graphics.VertexPosition;
 
-namespace App1.Utils;
+namespace ProjectM.Utils;
 
 public class OrientationGraph
 {

@@ -2,7 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Graphics;
+namespace ProjectM.Graphics;
 
 public class Camera
 {

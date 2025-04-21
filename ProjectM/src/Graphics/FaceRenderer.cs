@@ -5,12 +5,12 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using App1.Graphics.Textures;
+using ProjectM.Graphics.Textures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 
-namespace App1.Graphics;
+namespace ProjectM.Graphics;
 
 public class FaceRenderer
 {

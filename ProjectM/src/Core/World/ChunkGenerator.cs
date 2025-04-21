@@ -2,7 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Core.World;
+namespace ProjectM.Core.World;
 
 public class ChunkGenerator
 {

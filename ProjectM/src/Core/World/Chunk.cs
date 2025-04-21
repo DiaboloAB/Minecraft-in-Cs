@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using App1.Graphics;
-using App1.Graphics.Textures;
+using ProjectM.Graphics;
+using ProjectM.Graphics.Textures;
 using Microsoft.Xna.Framework.Graphics;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
-using VertexPositionTexture = App1.Graphics.VertexPositionTexture;
+using VertexPositionTexture = ProjectM.Graphics.VertexPositionTexture;
 
-namespace App1.Core.World;
+namespace ProjectM.Core.World;
 
 public class Chunk
 {

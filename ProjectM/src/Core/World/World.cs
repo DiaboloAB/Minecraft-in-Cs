@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using App1.Graphics;
-using App1.Graphics.Textures;
+using ProjectM.Graphics;
+using ProjectM.Graphics.Textures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace App1.Core.World;
+namespace ProjectM.Core.World;
 
 public class World
 {

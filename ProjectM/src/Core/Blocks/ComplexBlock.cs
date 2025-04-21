@@ -1,4 +1,4 @@
-﻿namespace App1.Core.Block;
+﻿namespace ProjectM.Core.Block;
 
 public class ComplexBlock : Block
 {

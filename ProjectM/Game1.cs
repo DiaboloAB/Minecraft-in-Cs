@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using App1.Core.Player;
-using App1.Core.World;
-using App1.Graphics;
-using App1.Graphics.Renderer;
-using App1.Graphics.Textures;
-using App1.Utils;
+using ProjectM.Core.Player;
+using ProjectM.Core.World;
+using ProjectM.Graphics;
+using ProjectM.Graphics.Renderer;
+using ProjectM.Graphics.Textures;
+using ProjectM.Utils;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 
-namespace App1;
+namespace ProjectM;
 
 public class Game1 : Game
 {

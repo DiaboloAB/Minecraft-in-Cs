@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Input;
 
-namespace App1.Utils;
+namespace ProjectM.Utils;
 
 public static class Input
 {

@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 
-namespace App1.Graphics;
+namespace ProjectM.Graphics;
 
 public struct CubeData
 {
