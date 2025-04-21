@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace App1.Core.Player;
 
-public class Player
+public class Spectator
 {
     public float moveSpeed = 25f;
     public Vector3 position = new Vector3(0, 0, 0);
@@ -20,7 +20,7 @@ public class Player
     
     
     
-    public Player(GraphicsDevice graphicsDevice)
+    public Spectator(GraphicsDevice graphicsDevice)
     {
         Camera = new Camera(graphicsDevice);
         

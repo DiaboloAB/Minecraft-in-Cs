@@ -168,7 +168,7 @@ public class Game1 : Game
         world.CreateChunksBuffers(player.GetPosition(), 4);
 
         
-        player.Update(gameTime);
+        player.Update(gameTime, world);
         HandleInput(gameTime);
 
 

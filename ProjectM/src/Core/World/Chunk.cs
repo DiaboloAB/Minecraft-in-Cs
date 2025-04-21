@@ -135,6 +135,16 @@ public class Chunk
             return 0;
         }
     }
+
+    public int GetBlockAt(Vector3 pos)
+    {
+        pos = pos - position * new Vector3(SIZE, HEIGHT, SIZE);
+        if (pos.X < 0 || pos.X >= SIZE || pos.Y < 0 || pos.Y >= HEIGHT || pos.Z < 0 || pos.Z >= SIZE)
+        {
+            return 0;
+        }
+        return blocks[(int)pos.X, (int)pos.Y, (int)pos.Z];
+    }
     
     public int GetBlock(Vector3 pos)
     {

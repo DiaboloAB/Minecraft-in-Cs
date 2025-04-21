@@ -89,7 +89,7 @@ public class World
 
                 lock (chunkBufferQueue)
                 {
-                    Console.WriteLine($"BufferWorker: {chunkBufferQueue.Count}");
+                    // Console.WriteLine($"BufferWorker: {chunkBufferQueue.Count}");
                     if (chunkBufferQueue.Count > 0)
                     {
                         var ch = chunkBufferQueue.Dequeue();
@@ -135,6 +135,15 @@ public class World
         return chunks[(x, z)];
     }
     
+    public Chunk GetChunk(Vector3 position)
+    {
+        
+        return chunks[(
+            (int)position.X / Chunk.SIZE - (position.X < 0 ? 1 : 0),
+            (int)position.Z / Chunk.SIZE  - (position.Z < 0 ? 1 : 0)
+            )];
+    }
+    
     public Vector3 GetChunkPosition(Vector3 position)
     {
         return new Vector3((int)position.X / Chunk.SIZE, 0, (int)position.Z / Chunk.SIZE);
@@ -145,6 +154,12 @@ public class World
         int chunkX = x / Chunk.SIZE;
         int chunkZ = z / Chunk.SIZE;
         return chunks[(chunkX, chunkZ)].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
+    }
+    
+    public int GetBlockAt(Vector3 pos)
+    {
+        Chunk chunk = GetChunk(pos);
+        return chunk.GetBlockAt(pos);
     }
     
     public void SetBlock(int x, int y, int z, int type)
@@ -214,6 +229,30 @@ public class World
                 
         }
             
+    }
+
+    public List<Chunk> GetChunksIntersectingBoundingBox(Vector3 position, Vector3 size)
+    {
+        List<Chunk> intersectingChunks = new List<Chunk>();
+
+        // Calculate the range of chunks that the bounding box intersects
+        int startX = (int)Math.Floor(position.X / Chunk.SIZE);
+        int endX = (int)Math.Ceiling((position.X + size.X) / Chunk.SIZE);
+        int startZ = (int)Math.Floor(position.Z / Chunk.SIZE);
+        int endZ = (int)Math.Ceiling((position.Z + size.Z) / Chunk.SIZE);
+
+        for (int x = startX; x <= endX; x++)
+        {
+            for (int z = startZ; z <= endZ; z++)
+            {
+                if (chunks.ContainsKey((x, z)))
+                {
+                    intersectingChunks.Add(chunks[(x, z)]);
+                }
+            }
+        }
+
+        return intersectingChunks;
     }
     
 }
