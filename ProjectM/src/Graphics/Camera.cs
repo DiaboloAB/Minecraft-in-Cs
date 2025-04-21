@@ -64,41 +64,13 @@ public class Camera
         }
     }
     
-    public void Rotate(Vector3 rotation)
+    public void SetRotation(Vector3 rotation)
     {
-        Rotation += rotation;
-        
-        // Console.WriteLine("Rotation: " + Rotation);
-        
-        
-        Vector3 Rotation360 = new Vector3(
-            MathHelper.WrapAngle(Rotation.X),
-            MathHelper.WrapAngle(Rotation.Y),
-            MathHelper.WrapAngle(Rotation.Z)
-        );
-        
-        if (Rotation.Y > Math.PI)
-        {
-            Rotation = new Vector3(Rotation.X, Rotation.Y - MathHelper.TwoPi, Rotation.Z);
-        }
-        else if (Rotation.Y < -Math.PI)
-        {
-            Rotation = new Vector3(Rotation.X, Rotation.Y + MathHelper.TwoPi, Rotation.Z);
-        }
-        
-        
-        
-        if (Rotation360.X > MathHelper.PiOver2 - 0.1f)
-        {
-            Rotation = new Vector3(MathHelper.PiOver2 - 0.1f, Rotation.Y, Rotation.Z);
-        }
-        else if (Rotation360.X < -MathHelper.PiOver2 + 0.1f)
-        {
-            Rotation = new Vector3(-MathHelper.PiOver2 + 0.1f, Rotation.Y, Rotation.Z);
-        }
+        Rotation = rotation;
         
         UpdateViewMatrix();
         UpdateFacing();
+
     }
     public void Move(Vector3 movement)
     {

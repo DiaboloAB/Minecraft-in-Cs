@@ -146,7 +146,7 @@ public class World
     
     public Vector3 GetChunkPosition(Vector3 position)
     {
-        return new Vector3((int)position.X / Chunk.SIZE, 0, (int)position.Z / Chunk.SIZE);
+        return new Vector3(((int)position.X / Chunk.SIZE)  - (position.X < 0 ? 1 : 0), 0, ((int)position.Z / Chunk.SIZE)  - (position.Z < 0 ? 1 : 0));
     }
     
     public int GetBlock(int x, int y, int z)

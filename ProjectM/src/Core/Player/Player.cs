@@ -4,6 +4,7 @@ using ProjectM.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectM.Utils;
 
 
 namespace ProjectM.Core.Player;
@@ -11,10 +12,10 @@ namespace ProjectM.Core.Player;
 public class Player
 {
     public float moveSpeed = 25f;
-    public Vector3 rotation = new Vector3(0, 0, 0);
     
     public Vector3 Position { get; set; }
     public Vector3 Velocity { get; set; }
+    public Vector3 Rotation { get; set; }
 
     private const float Gravity = 9.8f;
     private const float JumpForce = 5f;
@@ -62,9 +63,29 @@ public class Player
         {
             Velocity = Vector3.Zero;
         }
+
+
+
+        // if (cameraMode == CameraMode.FirstPerson)
+        // {
+        //     Camera.Position = Position + new Vector3(0, 1.5f, 0);
+        // }
+        Camera.SetRotation(Rotation);
         
-        
-        Camera.SetPosition(Position);
+        if (cameraMode == CameraMode.FirstPerson)
+        {
+            Camera.SetPosition(Position);
+        }
+        else
+        {
+            Camera.SetPosition(
+                Position + new Vector3(
+                    (float)Math.Sin(Rotation.Y) * 5,
+                    1.5f,
+                    (float)Math.Cos(Rotation.Y) * 5)
+                );
+
+        }
 
     }
 
@@ -99,7 +120,13 @@ public class Player
         previousScrollValue = mouseState.ScrollWheelValue;
             
         // cameraMode = CameraMode.FirstPerson;
-        
+        if (Input.IsKeyPressed(Keys.F5))
+        {
+            cameraMode += 1;
+            if (cameraMode > CameraMode.FreeCamera)
+                cameraMode = CameraMode.FirstPerson;
+            Console.WriteLine("Camera mode: " + cameraMode);
+        }
         
         
         if (keyboardState.IsKeyDown(Keys.Z))
@@ -128,10 +155,44 @@ public class Player
         
         Vector2 mouseDelta = new Vector2(mouseState.X, mouseState.Y) - lastMousePosition;
         if ( mouseDelta != Vector2.Zero)
-            Camera.Rotate(new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed, 0) * (float)gameTime.ElapsedGameTime.TotalSeconds);
+            Rotate(
+                new Vector3(-mouseDelta.Y * rotationSpeed, -mouseDelta.X * rotationSpeed,0)
+                * (float)gameTime.ElapsedGameTime.TotalSeconds
+                );
         
         // lastMousePosition = new Vector2(mouseState.X, mouseState.Y);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
+    }
+    
+    public Vector3 Rotate(Vector3 rotation)
+    {
+        Rotation += rotation;
+        
+        Vector3 Rotation360 = new Vector3(
+            MathHelper.WrapAngle(Rotation.X),
+            MathHelper.WrapAngle(Rotation.Y),
+            MathHelper.WrapAngle(Rotation.Z)
+        );
+        
+        if (Rotation.Y > Math.PI)
+        {
+            Rotation = new Vector3(Rotation.X, Rotation.Y - MathHelper.TwoPi, Rotation.Z);
+        }
+        else if (Rotation.Y < -Math.PI)
+        {
+            Rotation = new Vector3(Rotation.X, Rotation.Y + MathHelper.TwoPi, Rotation.Z);
+        }
+        
+        if (Rotation360.X > MathHelper.PiOver2 - 0.1f)
+        {
+            Rotation = new Vector3(MathHelper.PiOver2 - 0.1f, Rotation.Y, Rotation.Z);
+        }
+        else if (Rotation360.X < -MathHelper.PiOver2 + 0.1f)
+        {
+            Rotation = new Vector3(-MathHelper.PiOver2 + 0.1f, Rotation.Y, Rotation.Z);
+        }
+        
+        return Rotation;
     }
     
     public Vector3 GetPosition()

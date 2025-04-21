@@ -33,7 +33,7 @@ public class Game1 : Game
     
     private ChunkGenerator chunkGenerator;
     
-    private ChunkMeshBuilder chunkMeshBuilder;
+    private ChunkRenderer chunkMeshBuilder;
     private Chunk[] chunks;
     
     private double fps = 0;
@@ -96,6 +96,7 @@ public class Game1 : Game
         atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
         atlas.Save();
         BlockTextureCoord.SetTextureCoords(atlas);
+        chunkMeshBuilder = new ChunkRenderer(GraphicsDevice);
         orientationGraph = new OrientationGraph(GraphicsDevice);
         
 
@@ -160,6 +161,7 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        Input.Update();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
@@ -189,6 +191,7 @@ public class Game1 : Game
         // cubeRenderer.UpdateViewProjection(camera);
         // faceRenderer.UpdateViewProjection(camera);
         renderer.UpdateViewProjection(player.Camera);
+        chunkMeshBuilder.UpdateViewProjection(player.Camera);
         
         if (keyboardState.IsKeyDown(Keys.F1) && !debugSwitch)
         {
@@ -212,6 +215,7 @@ public class Game1 : Game
         renderer.DrawWorld(world, world.GetChunkPosition(player.GetPosition()), 16);
         Vector3 camRotation = player.Camera.Rotation;
         orientationGraph.DrawOrientationGraph(player.Camera);
+        chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
         
         _spriteBatch.Begin();
         _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
