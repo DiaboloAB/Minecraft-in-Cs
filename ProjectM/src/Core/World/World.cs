@@ -11,8 +11,8 @@ namespace ProjectM.Core.World;
 
 public class World
 {
-    private ChunkGenerator chunkGenerator;
-    public Dictionary<(int, int), Chunk> chunks;
+    private ChunkGenerator _chunkGenerator;
+    public Dictionary<(int, int), Chunk> Chunks;
     private Vector2 worldSize = new Vector2(40, 40);
 
     private GraphicsDevice _graphicsDevice;
@@ -21,15 +21,15 @@ public class World
 
     object worldLock = new();
 
-    public PriorityQueue<(int, int), int> chunkQueue;
-    public PriorityQueue<(int, int), int> chunkBufferQueue;
+    private PriorityQueue<(int, int), int> chunkQueue;
+    private PriorityQueue<(int, int), int> chunkBufferQueue;
     
     public World(int seed, GraphicsDevice graphicsDevice)
     {
         _graphicsDevice = graphicsDevice;
         this.seed = seed;
-        chunkGenerator = new ChunkGenerator(seed);
-        chunks = new Dictionary<(int, int), Chunk>();
+        _chunkGenerator = new ChunkGenerator(seed);
+        Chunks = new Dictionary<(int, int), Chunk>();
         chunkQueue = new PriorityQueue<(int, int), int>();
         
         chunkBufferQueue = new PriorityQueue<(int, int), int>();
@@ -70,7 +70,7 @@ public class World
 
             Parallel.ForEach(batch, chunk =>
             {
-                var generatedChunk = chunkGenerator.GenerateChunk(chunk.Item1, chunk.Item2, this);
+                var generatedChunk = _chunkGenerator.GenerateChunk(chunk.Item1, chunk.Item2, this);
                 StoreGeneratedChunk(chunk.Item1, chunk.Item2, generatedChunk);
             });
 
@@ -106,10 +106,10 @@ public class World
                 {
                     lock (worldLock) // Synchronize access to chunks
                     {
-                        if (chunks.ContainsKey(chunk))
+                        if (Chunks.ContainsKey(chunk))
                         {
-                            chunks[chunk].CreateBuffers(_graphicsDevice);
-                            chunks[chunk].HasMeshDataRdy = true;
+                            Chunks[chunk].CreateBuffers(_graphicsDevice);
+                            Chunks[chunk].HasMeshDataRdy = true;
                         }
                     }
                 });
@@ -126,19 +126,19 @@ public class World
     {
         lock (worldLock)
         {
-            chunks[(x, z)] = chunk;
+            Chunks[(x, z)] = chunk;
         }
     }
     
     public Chunk GetChunk(int x, int z)
     {
-        return chunks[(x, z)];
+        return Chunks[(x, z)];
     }
     
     public Chunk GetChunk(Vector3 position)
     {
         
-        return chunks[(
+        return Chunks[(
             (int)position.X / Chunk.SIZE - (position.X < 0 ? 1 : 0),
             (int)position.Z / Chunk.SIZE  - (position.Z < 0 ? 1 : 0)
             )];
@@ -153,7 +153,7 @@ public class World
     {
         int chunkX = x / Chunk.SIZE;
         int chunkZ = z / Chunk.SIZE;
-        return chunks[(chunkX, chunkZ)].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
+        return Chunks[(chunkX, chunkZ)].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
     }
     
     public int GetBlockAt(Vector3 pos)
@@ -170,16 +170,16 @@ public class World
         int chunkZ = z / Chunk.SIZE;
         if (!(chunkX < worldSize.X && chunkZ < worldSize.Y))
             return;
-        if (!chunks.ContainsKey((chunkX, chunkZ)))
+        if (!Chunks.ContainsKey((chunkX, chunkZ)))
             return;
-        chunks[(chunkX, chunkZ)].SetBlock(x % Chunk.SIZE, y, z % Chunk.SIZE, type);
+        Chunks[(chunkX, chunkZ)].SetBlock(x % Chunk.SIZE, y, z % Chunk.SIZE, type);
     }
     
     public List<CubeData> GetVisibleCubes(Texture2D[] textures)
     {
         
         List<CubeData> cubes = new List<CubeData>();
-        foreach(var chunk in chunks.Values)
+        foreach(var chunk in Chunks.Values)
             cubes.AddRange(chunk.getVisibleCubes(textures));
         return cubes;
     }
@@ -190,11 +190,11 @@ public class World
         {
             for (int j = (int)(position.Z - radius); j < (int)(position.Z + radius); j++)
             {
-                if (!chunks.ContainsKey((i, j)))
+                if (!Chunks.ContainsKey((i, j)))
                 {
                     int distance = (int)Vector3.Distance(position, new Vector3(i, 0, j));
                     // var chunk = chunkGenerator.GenerateChunk(i, j, this);
-                    chunks[(i, j)] = new Chunk(new Vector3(i, 0, j), this);
+                    Chunks[(i, j)] = new Chunk(new Vector3(i, 0, j), this);
                     chunkQueue.Enqueue((i, j), Math.Abs(
                         distance));
                     // chunk.IsDirty = true; 
@@ -207,7 +207,7 @@ public class World
     public List<FaceData> GetVisibleFaces(Atlas atlas)
     {
         List<FaceData> cubes = new List<FaceData>();
-        foreach(var chunk in chunks.Values)
+        foreach(var chunk in Chunks.Values)
             cubes.AddRange(chunk.getVisibleFaces(atlas));
         return cubes;
     }
@@ -215,12 +215,12 @@ public class World
     public void CreateChunksBuffers(Vector3 position, int radius)
     {
         // Console.WriteLine("Creating chunks buffers");
-        foreach (var chunk in chunks.Values)
+        foreach (var chunk in Chunks.Values)
         {
             if (chunk.IsDirty && chunk.Generated)
             {
-                int distance = (int)Vector3.Distance(position, new Vector3((int)chunk.position.X, 0, (int)chunk.position.Z));
-                chunkBufferQueue.Enqueue(((int)chunk.position.X, (int)chunk.position.Z), Math.Abs(
+                int distance = (int)Vector3.Distance(position, new Vector3((int)chunk.MatrixPosition.X, 0, (int)chunk.MatrixPosition.Z));
+                chunkBufferQueue.Enqueue(((int)chunk.MatrixPosition.X, (int)chunk.MatrixPosition.Z), Math.Abs(
                     distance));
                 chunk.HasMeshDataRdy = false;
                 chunk.IsDirty = false;
@@ -245,9 +245,9 @@ public class World
         {
             for (int z = startZ; z <= endZ; z++)
             {
-                if (chunks.ContainsKey((x, z)))
+                if (Chunks.ContainsKey((x, z)))
                 {
-                    intersectingChunks.Add(chunks[(x, z)]);
+                    intersectingChunks.Add(Chunks[(x, z)]);
                 }
             }
         }

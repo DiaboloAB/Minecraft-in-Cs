@@ -13,11 +13,14 @@ public class Chunk
 {
     public const int SIZE = 16;
     public const int HEIGHT = 256;
-    private readonly int [,,] blocks;
-    public Vector3 position;
     public bool IsDirty = true;
     public bool Generated = false;
     public bool Processing = false;
+    public Vector3 WorldPosition;
+    public Vector3 MatrixPosition;
+    
+    private readonly int [,,] blocks;
+
     
     private World world;
     
@@ -29,10 +32,11 @@ public class Chunk
     public IndexBuffer IndexBuffer;
     public int IndexCount;
     
-    public Chunk(Vector3 position, World world)
+    public Chunk(Vector3 matrixPosition, World world)
     {
         this.world = world;
-        this.position = position;
+        this.MatrixPosition = matrixPosition;
+        this.WorldPosition = matrixPosition * new Vector3(SIZE, 0, SIZE);
         blocks = new int[SIZE, HEIGHT, SIZE];
     }
     
@@ -51,7 +55,7 @@ public class Chunk
                     int blockType = blocks[x, y, z];
                     if (blockType == 0) continue;
                     
-                    Vector3 blockPos = new Vector3(x, y, z) + position * new Vector3(SIZE, HEIGHT, SIZE);
+                    Vector3 blockPos = new Vector3(x, y, z) + WorldPosition;
                     AddCubeVertices(blockType, vertices, indices, blockPos, new Vector3(x, y, z), ref index);
                 }
             }
@@ -103,19 +107,19 @@ public class Chunk
             int blockType;
             if (x < 0)
             {
-                blockType = world.GetChunk((int)position.X - 1, (int)position.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
+                blockType = world.GetChunk((int)MatrixPosition.X - 1, (int)MatrixPosition.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
             }
             else if (x >= Chunk.SIZE)
             {
-                blockType = world.GetChunk((int)position.X + 1, (int)position.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
+                blockType = world.GetChunk((int)MatrixPosition.X + 1, (int)MatrixPosition.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
             }
             else if (z < 0)
             {
-                blockType = world.GetChunk((int)position.X, (int)position.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
+                blockType = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
             }
             else if (z >= Chunk.SIZE)
             {
-                blockType = world.GetChunk((int)position.X, (int)position.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
+                blockType = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
             }
             else
             {
@@ -136,9 +140,11 @@ public class Chunk
         }
     }
 
+    
+    
     public int GetBlockAt(Vector3 pos)
     {
-        pos = pos - position * new Vector3(SIZE, HEIGHT, SIZE);
+        pos = pos - WorldPosition;
         if (pos.X < 0 || pos.X >= SIZE || pos.Y < 0 || pos.Y >= HEIGHT || pos.Z < 0 || pos.Z >= SIZE)
         {
             return 0;
@@ -180,7 +186,7 @@ public class Chunk
                     
                     cubes.Add(new CubeData
                     {
-                        Position = blockPos + position * new Vector3(SIZE, HEIGHT, SIZE),
+                        Position = blockPos + WorldPosition,
                         Scale = Vector3.One,
                         Texture = textures[1]
                     });
@@ -211,7 +217,7 @@ public class Chunk
                         if ((faceMask & (1 << i)) == 0) continue;
                         faces.Add(new FaceData
                         {
-                            Position = blockPos + position * new Vector3(SIZE, HEIGHT, SIZE),
+                            Position = blockPos + WorldPosition,
                             TexCoord = BlockTextureCoord.TextureCoords[blockType][i],
                             Orientation = (short)i
                         });

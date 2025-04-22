@@ -120,7 +120,7 @@ public class ChunkGenerator
         // Trunk
         for (int i = 0; i < 5; i++)
         {
-            world.SetBlock((int)(Chunk.SIZE * chunk.position.X + x), y + i, (int)(Chunk.SIZE * chunk.position.Z + z), (int)BlockType.Wood);
+            world.SetBlock((int)(chunk.MatrixPosition.X + x), y + i, (int)(chunk.WorldPosition.Z + z), (int)BlockType.Wood);
         }
 
         // leaves
@@ -132,7 +132,7 @@ public class ChunkGenerator
                 {
                     if (Math.Abs(i) + Math.Abs(j) + Math.Abs(k) < 5)
                     {
-                        world.SetBlock((int)(Chunk.SIZE * chunk.position.X + x + i), y + 5 + j, (int)(Chunk.SIZE * chunk.position.Z + z + k), (int)BlockType.Leaves);
+                        world.SetBlock((int)(chunk.WorldPosition.X + x + i), y + 5 + j, (int)(chunk.WorldPosition.Z + z + k), (int)BlockType.Leaves);
                     }
                 }
             }

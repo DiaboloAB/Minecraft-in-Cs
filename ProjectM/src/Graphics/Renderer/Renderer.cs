@@ -44,7 +44,7 @@ public class Renderer
         {
             for (int j = (int)(position.Z - radius); j < position.Z + radius; j++)
             {
-                if (world.chunks.ContainsKey((i, j)))
+                if (world.Chunks.ContainsKey((i, j)))
                 {
                     var chunk = world.GetChunk(i, j);
                     if (!chunk.HasMeshDataRdy || !chunk.Generated)

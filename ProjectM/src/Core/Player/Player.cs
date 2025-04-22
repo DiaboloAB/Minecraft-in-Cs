@@ -60,7 +60,7 @@ public class Player
         
         Vector3 correction = HandleCollisions(newPosition, world);
         
-        Position = newPosition + correction;
+        
 
         if (correction != Vector3.Zero)
         {
@@ -84,7 +84,7 @@ public class Player
             //minecraft like third person camera
             // camera 3meter behind the player base camera, fixing the player head
             Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, 0);
-            Vector3 rotatedOffset = Vector3.Transform(new Vector3(0, 0, -3), rotationMatrix);
+            Vector3 rotatedOffset = Vector3.Transform(new Vector3(0, 0, -5), rotationMatrix);
             Camera.SetPosition(
                 Position - rotatedOffset
             );
@@ -97,19 +97,38 @@ public class Player
     private Vector3 HandleCollisions(Vector3 newPosition, World.World world)
     {
         Vector3 correction = Vector3.Zero;
-        
 
-        
-        Vector3 tmp = newPosition - new Vector3(0, -Size.Y, 0);
-        // Console.WriteLine(tmp);
-        int block = world.GetBlockAt(tmp);
-        if (block != 0)
+        // Check collision on Y-axis
+        Vector3 bottomPosition = newPosition - new Vector3(0, Size.Y, 0);
+        int blockBelow = world.GetBlockAt(bottomPosition);
+        if (blockBelow != 0)
         {
-            Console.WriteLine("Collision detected");
-            correction.Y = -((int)(tmp.Y + 1) - Position.Y);
+            correction.Y = Size.Y - (newPosition.Y - (float)Math.Floor(bottomPosition.Y));
+            newPosition.Y = (float)Math.Floor(bottomPosition.Y) + Size.Y;
+            Velocity = Vector3.Zero;
         }
-        
-        
+
+        // // Check collision on X-axis
+        // Vector3 xPosition = new Vector3(newPosition.X, Position.Y, Position.Z);
+        // int blockX = world.GetBlockAt(xPosition);
+        // if (blockX != 0)
+        // {
+        //     correction.X = Position.X - (float)Math.Floor(xPosition.X);
+        //     newPosition.X = Position.X; // Prevent movement through the block
+        //     Velocity = Vector3.Zero;
+        // }
+        //
+        // // Check collision on Z-axis
+        // Vector3 zPosition = new Vector3(Position.X, Position.Y, newPosition.Z);
+        // int blockZ = world.GetBlockAt(zPosition);
+        // if (blockZ != 0)
+        // {
+        //     correction.Z = Position.Z - (float)Math.Floor(zPosition.Z);
+        //     newPosition.Z = Position.Z; // Prevent movement through the block
+        //     Velocity = Vector3.Zero;
+        // }
+
+        Position = newPosition;
         return correction;
     }
 
@@ -120,8 +139,9 @@ public class Player
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
-
-        moveSpeed += mouseState.ScrollWheelValue - previousScrollValue;
+        
+        float targetSpeed = moveSpeed + (mouseState.ScrollWheelValue - previousScrollValue);
+        moveSpeed = MathHelper.Lerp(moveSpeed, targetSpeed, 0.1f); // Adjust 0.1f for smoothness
         previousScrollValue = mouseState.ScrollWheelValue;
             
         // cameraMode = CameraMode.FirstPerson;

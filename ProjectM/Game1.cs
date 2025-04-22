@@ -19,22 +19,20 @@ public class Game1 : Game
     private Player player;
     
     private OrientationGraph orientationGraph;
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
+    private GraphicsDeviceManager graphics;
+    private SpriteBatch spriteBatch;
     private World world;
 
     private Texture2D defaultTexture;
-    Texture2D texture;
-    Texture2D texture2;
+    private Texture2D texture;
+    private Texture2D texture2;
     
     // private CubeRenderer cubeRenderer;
     // private FaceRenderer faceRenderer;
     private Renderer renderer;
     
-    private ChunkGenerator chunkGenerator;
     
     private ChunkRenderer chunkMeshBuilder;
-    private Chunk[] chunks;
     
     private double fps = 0;
     private double fpsTimer = 0;
@@ -50,10 +48,10 @@ public class Game1 : Game
 
     public Game1()
     {
-        _graphics = new GraphicsDeviceManager(this);
+        graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";                 
         // IsMouseVisible = false;
-        _graphics.SynchronizeWithVerticalRetrace = false;
+        graphics.SynchronizeWithVerticalRetrace = false;
         IsFixedTimeStep = false;
         IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60);
@@ -103,9 +101,9 @@ public class Game1 : Game
 
         
         
-        _graphics.PreferredBackBufferWidth = 1920 / 2;
-        _graphics.PreferredBackBufferHeight = 1080 / 2;
-        _graphics.ApplyChanges();
+        graphics.PreferredBackBufferWidth = 1920 / 2;
+        graphics.PreferredBackBufferHeight = 1080 / 2;
+        graphics.ApplyChanges();
         // cubeRenderer = new CubeRenderer(GraphicsDevice, effect, camera);
         // faceRenderer = new FaceRenderer(GraphicsDevice, effectbis, player.Camera, 16f / 2048f, 50000);
         // faceRenderer.SetAtlasTexture(atlas.Texture);
@@ -156,7 +154,7 @@ public class Game1 : Game
 
     protected override void LoadContent()
     {
-        _spriteBatch = new SpriteBatch(GraphicsDevice);
+        spriteBatch = new SpriteBatch(GraphicsDevice);
     }
 
     protected override void Update(GameTime gameTime)
@@ -165,10 +163,15 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
+
+        if (Input.IsKeyPressed(Keys.H))
+        {
+            Vector3 pos = player.GetPosition();
+            world.SetBlock((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
+        }
         
         world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 4);
         world.CreateChunksBuffers(player.GetPosition(), 4);
-
         
         player.Update(gameTime, world);
         HandleInput(gameTime);
@@ -218,16 +221,16 @@ public class Game1 : Game
         orientationGraph.DrawOrientationGraph(player.Camera);
         chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
         
-        _spriteBatch.Begin();
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) player.Camera.Position.X}, {(int) player.Camera.Position.Y}, {(int) player.Camera.Position.Z}", new Vector2(10, 50), Color.White);
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "moveSpeed: " + player.moveSpeed, new Vector2(10, 90), Color.White);
+        spriteBatch.Begin();
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) player.Camera.Position.X}, {(int) player.Camera.Position.Y}, {(int) player.Camera.Position.Z}", new Vector2(10, 50), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "moveSpeed: " + player.moveSpeed, new Vector2(10, 90), Color.White);
         //chunk pos
-        _spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.GetPosition())}", new Vector2(10, 110), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.GetPosition())}", new Vector2(10, 110), Color.White);
         
-        _spriteBatch.Draw(
+        spriteBatch.Draw(
             crosshair, 
             new Vector2(GraphicsDevice.Viewport.Width / 2 - crosshair.Width, GraphicsDevice.Viewport.Height / 2 - crosshair.Height), 
             null, 
@@ -238,7 +241,7 @@ public class Game1 : Game
             SpriteEffects.None, 
             0f
         );
-        _spriteBatch.End();
+        spriteBatch.End();
         base.Draw(gameTime);
     }
 }
