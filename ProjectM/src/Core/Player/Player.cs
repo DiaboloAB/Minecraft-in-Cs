@@ -100,7 +100,7 @@ public class Player
 
         // Check collision on Y-axis
         Vector3 bottomPosition = newPosition - new Vector3(0, Size.Y, 0);
-        int blockBelow = world.GetBlockAt(bottomPosition);
+        int blockBelow = world.GetBlocAt(bottomPosition);
         if (blockBelow != 0)
         {
             correction.Y = Size.Y - (newPosition.Y - (float)Math.Floor(bottomPosition.Y));

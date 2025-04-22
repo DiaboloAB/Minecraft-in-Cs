@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace ProjectM.Core.World;
 
-public class BlockTextureCoord
+public class BlocTextureCoord
 {
     public static Vector2[][] TextureCoords { get; private set; }
 

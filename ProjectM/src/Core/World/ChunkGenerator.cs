@@ -30,7 +30,7 @@ public class ChunkGenerator
         caveNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
         caveNoise.SetFrequency(0.5f);
         
-        Textures = new Texture2D[BlockType.GetValues(typeof(BlockType)).Length];
+        Textures = new Texture2D[BlocType.GetValues(typeof(BlocType)).Length];
     }
     
     public Chunk GenerateChunk(int x, int z, World world)
@@ -56,15 +56,15 @@ public class ChunkGenerator
                     // 1 block of grass, 2 block of dirt, rest with stone
                     if (j == stoneHeight)
                     {
-                        chunk.SetBlock(i, j, k, (int)BlockType.Grass);
+                        chunk.SetBlock(i, j, k, (int)BlocType.Grass);
                     }
                     else if (j < stoneHeight && j > stoneHeight - 3)
                     {
-                        chunk.SetBlock(i, j, k, (int)BlockType.Dirt);
+                        chunk.SetBlock(i, j, k, (int)BlocType.Dirt);
                     }
                     else if (j < stoneHeight && j >= stoneHeight - 50)
                     {
-                        chunk.SetBlock(i, j, k, (int)BlockType.Stone);
+                        chunk.SetBlock(i, j, k, (int)BlocType.Stone);
                     }
                 }
             }
@@ -107,7 +107,7 @@ public class ChunkGenerator
     {
         for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
         {
-            if (chunk.GetBlock(new Vector3(x, y, z)) == (int)BlockType.Grass)
+            if (chunk.GetBlock(new Vector3(x, y, z)) == (int)BlocType.Grass)
             {
                 return y + 1;
             }
@@ -120,7 +120,7 @@ public class ChunkGenerator
         // Trunk
         for (int i = 0; i < 5; i++)
         {
-            world.SetBlock((int)(chunk.MatrixPosition.X + x), y + i, (int)(chunk.WorldPosition.Z + z), (int)BlockType.Wood);
+            world.SetBloc((int)(chunk.MatrixPosition.X + x), y + i, (int)(chunk.WorldPosition.Z + z), (int)BlocType.Wood);
         }
 
         // leaves
@@ -132,7 +132,7 @@ public class ChunkGenerator
                 {
                     if (Math.Abs(i) + Math.Abs(j) + Math.Abs(k) < 5)
                     {
-                        world.SetBlock((int)(chunk.WorldPosition.X + x + i), y + 5 + j, (int)(chunk.WorldPosition.Z + z + k), (int)BlockType.Leaves);
+                        world.SetBloc((int)(chunk.WorldPosition.X + x + i), y + 5 + j, (int)(chunk.WorldPosition.Z + z + k), (int)BlocType.Leaves);
                     }
                 }
             }
@@ -140,14 +140,4 @@ public class ChunkGenerator
         
     }
 
-}
-
-public enum BlockType
-{
-    Air = 0,
-    Grass = 1,
-    Stone = 2,
-    Dirt = 3,
-    Wood = 4,
-    Leaves = 5,
 }

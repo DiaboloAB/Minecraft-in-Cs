@@ -1,29 +1,29 @@
 ﻿using Microsoft.Xna.Framework;
 using ProjectM.Core.World;
 
-namespace ProjectM.Core.Block;
+namespace ProjectM.Core;
 
-public class Block
+public class Bloc
 {
     
-    public BlockType Type { get; set; }
+    public BlocType Type { get; set; }
     
     public Vector3 MatrixPosition { get; set; }
     
     private Chunk chunk;
     public Vector3 WorldPosition => MatrixPosition + chunk.WorldPosition;
     
-    public Block(Vector3 matrixPosition, Chunk chunk, BlockType type)
+    public Bloc(Vector3 matrixPosition, Chunk chunk, BlocType type)
     {
         chunk = chunk;
         MatrixPosition = matrixPosition;
         Type = type;
     }
 
-    protected BlockModel Model { get; set; }
+    protected BlocModel Model { get; set; }
 }
 
-public enum BlockType
+public enum BlocType
 {
     Air = 0,
     Grass = 1,

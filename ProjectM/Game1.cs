@@ -93,7 +93,7 @@ public class Game1 : Game
         
         atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
         atlas.Save();
-        BlockTextureCoord.SetTextureCoords(atlas);
+        BlocTextureCoord.SetTextureCoords(atlas);
         chunkMeshBuilder = new ChunkRenderer(GraphicsDevice);
         orientationGraph = new OrientationGraph(GraphicsDevice);
         
@@ -120,7 +120,7 @@ public class Game1 : Game
     
     private void CreateTestChests()
     {
-        BlockModel model = BlockModel.LoadModel(content, "Chest", GraphicsDevice);
+        BlocModel model = BlocModel.LoadModel(content, "Chest", GraphicsDevice);
         model.PrintModel();
         
         Texture2D texture = content.Load<Texture2D>("Textures/Chest");
@@ -167,7 +167,7 @@ public class Game1 : Game
         if (Input.IsKeyPressed(Keys.H))
         {
             Vector3 pos = player.GetPosition();
-            world.SetBlock((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
+            world.SetBloc((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
         }
         
         world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 4);

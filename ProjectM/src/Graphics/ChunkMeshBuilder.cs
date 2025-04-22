@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ProjectM.Core.Block;
+using ProjectM.Core;
 using ProjectM.Core.World;
 
 namespace ProjectM.Graphics;

@@ -19,7 +19,7 @@ public class Chunk
     public Vector3 WorldPosition;
     public Vector3 MatrixPosition;
     
-    private readonly int [,,] blocks;
+    private readonly Bloc [,,] blocs;
 
     
     private World world;
@@ -37,7 +37,17 @@ public class Chunk
         this.world = world;
         this.MatrixPosition = matrixPosition;
         this.WorldPosition = matrixPosition * new Vector3(SIZE, 0, SIZE);
-        blocks = new int[SIZE, HEIGHT, SIZE];
+        blocs = new Bloc[SIZE, HEIGHT, SIZE];
+        for (int x = 0; x < SIZE; x++)
+        {
+            for (int y = 0; y < HEIGHT; y++)
+            {
+                for (int z = 0; z < SIZE; z++)
+                {
+                    blocs[x, y, z] = new Bloc(new Vector3(x, y, z), this, Core.BlocType.Air);
+                }
+            }
+        }
     }
     
     public void CreateBuffers(GraphicsDevice graphicsDevice)
@@ -52,7 +62,7 @@ public class Chunk
             {
                 for (int z = 0; z < SIZE; z++)
                 {
-                    int blockType = blocks[x, y, z];
+                    int blockType = (int)blocs[x, y, z].Type;
                     if (blockType == 0) continue;
                     
                     Vector3 blockPos = new Vector3(x, y, z) + WorldPosition;
@@ -80,7 +90,7 @@ public class Chunk
         for (int i = 0; i < 6; i++)
         {
             if ((faceMask & (1 << i)) == 0) continue;
-            Vector2 texCoord = BlockTextureCoord.TextureCoords[blockType][i];
+            Vector2 texCoord = BlocTextureCoord.TextureCoords[blockType][i];
             
             vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][0], texCoord / 2048.0f));
             vertices.Add(new VertexPositionTexture(position + Cube.FaceVertices[i][1], (texCoord + new Vector2(0, 16)) / 2048.0f));
@@ -127,7 +137,7 @@ public class Chunk
             }
 
             // Treat Leaves as Air
-            if (blockType == (int)BlockType.Leaves)
+            if (blockType == (int)BlocType.Leaves)
             {
                 return 0;
             }
@@ -149,7 +159,7 @@ public class Chunk
         {
             return 0;
         }
-        return blocks[(int)pos.X, (int)pos.Y, (int)pos.Z];
+        return (int)blocs[(int)pos.X, (int)pos.Y, (int)pos.Z].Type;
     }
     
     public int GetBlock(Vector3 pos)
@@ -158,12 +168,12 @@ public class Chunk
         {
             return 0;
         }
-        return blocks[(int)pos.X, (int)pos.Y, (int)pos.Z];
+        return (int)blocs[(int)pos.X, (int)pos.Y, (int)pos.Z].Type;
     }
     
     public void SetBlock(int x, int y, int z, int type)
     {
-        blocks[x, y, z] = type;
+        blocs[x, y, z].Type = (Core.BlocType)type;
         IsDirty = true;
     }
     
@@ -177,7 +187,7 @@ public class Chunk
             {
                 for (int z = 0; z < SIZE; z++)
                 {
-                    int blockType = blocks[x, y, z];
+                    int blockType = (int)blocs[x, y, z].Type;
                     if (blockType == 0) continue;
                     Vector3 blockPos = new Vector3(x, y, z);
 
@@ -206,7 +216,7 @@ public class Chunk
             {
                 for (int z = 0; z < SIZE; z++)
                 {
-                    int blockType = blocks[x, y, z];
+                    int blockType = (int)blocs[x, y, z].Type;
                     if (blockType == 0) continue;
                     Vector3 blockPos = new Vector3(x, y, z);
 
@@ -218,7 +228,7 @@ public class Chunk
                         faces.Add(new FaceData
                         {
                             Position = blockPos + WorldPosition,
-                            TexCoord = BlockTextureCoord.TextureCoords[blockType][i],
+                            TexCoord = BlocTextureCoord.TextureCoords[blockType][i],
                             Orientation = (short)i
                         });
                     }

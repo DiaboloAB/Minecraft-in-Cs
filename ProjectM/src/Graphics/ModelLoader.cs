@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ProjectM.Graphics;
 
-public class BlockModel
+public class BlocModel
 {
     public VertexBuffer VertexBuffer { get; set; }
     public IndexBuffer IndexBuffer { get; set; }
@@ -146,9 +146,9 @@ public class BlockModel
         IndexBuffer.SetData(indexList.ToArray());
     }
     
-    public static BlockModel LoadModel(ContentManager content, string modelName, GraphicsDevice graphicsDevice)
+    public static BlocModel LoadModel(ContentManager content, string modelName, GraphicsDevice graphicsDevice)
     {
-        BlockModel model = new BlockModel();
+        BlocModel model = new BlocModel();
         string filePath = Path.Combine(content.RootDirectory, modelName + ".json");
         
         if (!File.Exists(filePath))

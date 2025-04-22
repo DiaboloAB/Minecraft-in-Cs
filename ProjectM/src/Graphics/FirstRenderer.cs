@@ -23,7 +23,7 @@ public class CubeRenderer
     private Matrix view;
     private Matrix projection;
     private Dictionary<Texture2D, (InstanceData[] instances, int count)> texturedInstances;
-    private Dictionary<(Texture2D, BlockModel), (InstanceData[] instances, int count)> texturedComplexInstances;
+    private Dictionary<(Texture2D, BlocModel), (InstanceData[] instances, int count)> texturedComplexInstances;
     
     public struct InstanceData
     {
@@ -41,7 +41,7 @@ public class CubeRenderer
     {
         this.graphicsDevice = graphicsDevice;
         this.texturedInstances = new Dictionary<Texture2D, (InstanceData[] instances, int count)>();
-        this.texturedComplexInstances = new Dictionary<(Texture2D, BlockModel), (InstanceData[] instances, int count)>();
+        this.texturedComplexInstances = new Dictionary<(Texture2D, BlocModel), (InstanceData[] instances, int count)>();
         this.effect = effect;
         
         UpdateViewProjection(camera);
@@ -99,7 +99,7 @@ public class CubeRenderer
         }
     }
     
-    public void UpdateComplexInstances(IEnumerable<CubeData> cubes, BlockModel model)
+    public void UpdateComplexInstances(IEnumerable<CubeData> cubes, BlocModel model)
     {
         texturedComplexInstances.Clear();
         

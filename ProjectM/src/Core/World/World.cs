@@ -156,13 +156,13 @@ public class World
         return Chunks[(chunkX, chunkZ)].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
     }
     
-    public int GetBlockAt(Vector3 pos)
+    public int GetBlocAt(Vector3 pos)
     {
         Chunk chunk = GetChunk(pos);
         return chunk.GetBlockAt(pos);
     }
     
-    public void SetBlock(int x, int y, int z, int type)
+    public void SetBloc(int x, int y, int z, int type)
     {
         if (x < 0 || y < 0 || z < 0)
             return;

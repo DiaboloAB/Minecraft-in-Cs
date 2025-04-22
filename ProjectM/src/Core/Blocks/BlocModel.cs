@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 
-namespace ProjectM.Core.Block;
+namespace ProjectM.Core;
 
-public class BlockModel
+public class BlocModel
 {
     public List<SubMesh> SubMeshes { get; }
     public bool IsFull { get; }
 
-    public BlockModel(List<SubMesh> subMeshes, bool isFull)
+    public BlocModel(List<SubMesh> subMeshes, bool isFull)
     {
         SubMeshes = subMeshes;
         IsFull = isFull;
