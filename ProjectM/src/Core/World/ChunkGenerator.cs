@@ -107,7 +107,7 @@ public class ChunkGenerator
     {
         for (int y = Chunk.HEIGHT - 1; y >= 0; y--)
         {
-            if (chunk.GetBlock(new Vector3(x, y, z)) == (int)BlocType.Grass)
+            if (chunk.GetBloc(x, y, z).Type == BlocType.Grass)
             {
                 return y + 1;
             }

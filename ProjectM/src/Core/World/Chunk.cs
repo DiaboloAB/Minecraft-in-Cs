@@ -114,27 +114,29 @@ public class Chunk
     {
         try
         {
-            int blockType;
+            Bloc bloc;
             if (x < 0)
             {
-                blockType = world.GetChunk((int)MatrixPosition.X - 1, (int)MatrixPosition.Z).GetBlock(new Vector3(Chunk.SIZE + x, y, z));
+                bloc = world.GetChunk((int)MatrixPosition.X - 1, (int)MatrixPosition.Z).GetBloc(Chunk.SIZE + x, y, z);
             }
             else if (x >= Chunk.SIZE)
             {
-                blockType = world.GetChunk((int)MatrixPosition.X + 1, (int)MatrixPosition.Z).GetBlock(new Vector3(x - Chunk.SIZE, y, z));
+                bloc = world.GetChunk((int)MatrixPosition.X + 1, (int)MatrixPosition.Z).GetBloc(x - Chunk.SIZE, y, z);
             }
             else if (z < 0)
             {
-                blockType = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z - 1).GetBlock(new Vector3(x, y, Chunk.SIZE + z));
+                bloc = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z - 1).GetBloc(x, y, Chunk.SIZE + z);
             }
             else if (z >= Chunk.SIZE)
             {
-                blockType = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z + 1).GetBlock(new Vector3(x, y, z - Chunk.SIZE));
+                bloc = world.GetChunk((int)MatrixPosition.X, (int)MatrixPosition.Z + 1).GetBloc(x, y, z - Chunk.SIZE);
             }
             else
             {
-                blockType = GetBlock(new Vector3(x, y, z));
+                bloc = GetBloc(x, y, z);
             }
+            
+            int blockType = (int)bloc.Type;
 
             // Treat Leaves as Air
             if (blockType == (int)BlocType.Leaves)
@@ -151,24 +153,23 @@ public class Chunk
     }
 
     
+    public Bloc GetBloc(int x, int y, int z)
+    {
+        if (x < 0 || x >= SIZE || y < 0 || y >= HEIGHT || z < 0 || z >= SIZE)
+        {
+            return null;
+        }
+        return blocs[x, y, z];
+    }
     
-    public int GetBlockAt(Vector3 pos)
+    public Bloc GetBloc(Vector3 pos)
     {
         pos = pos - WorldPosition;
         if (pos.X < 0 || pos.X >= SIZE || pos.Y < 0 || pos.Y >= HEIGHT || pos.Z < 0 || pos.Z >= SIZE)
         {
-            return 0;
+            return null;
         }
-        return (int)blocs[(int)pos.X, (int)pos.Y, (int)pos.Z].Type;
-    }
-    
-    public int GetBlock(Vector3 pos)
-    {
-        if (pos.X < 0 || pos.X >= SIZE || pos.Y < 0 || pos.Y >= HEIGHT || pos.Z < 0 || pos.Z >= SIZE)
-        {
-            return 0;
-        }
-        return (int)blocs[(int)pos.X, (int)pos.Y, (int)pos.Z].Type;
+        return blocs[(int)pos.X, (int)pos.Y, (int)pos.Z];
     }
     
     public void SetBlock(int x, int y, int z, int type)

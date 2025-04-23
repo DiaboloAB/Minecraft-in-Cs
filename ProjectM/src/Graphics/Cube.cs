@@ -43,50 +43,50 @@ public class Cube
     {
         new Vector3[] 
         {
-            new Vector3( 0.5f,  0.5f,  0.5f),
-            new Vector3( 0.5f, -0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f,  0.5f),
-            new Vector3(-0.5f,  0.5f,  0.5f),
+            new Vector3( 1,  1,  1),
+            new Vector3( 1, 0,  1),
+            new Vector3(0, 0,  1),
+            new Vector3(0,  1,  1),
         },
         // Back face
         new Vector3[]
         {
-            new Vector3(-0.5f,  0.5f, -0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f),
-            new Vector3( 0.5f, -0.5f, -0.5f),
-            new Vector3( 0.5f,  0.5f, -0.5f),
+            new Vector3(0,  1, 0),
+            new Vector3(0, 0, 0),
+            new Vector3( 1, 0, 0),
+            new Vector3( 1,  1, 0),
         },
         // Top face
         new Vector3[]
         {
-            new Vector3( 0.5f,  0.5f, -0.5f),
-            new Vector3( 0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f,  0.5f, -0.5f),
+            new Vector3( 1,  1, 0),
+            new Vector3( 1,  1,  1),
+            new Vector3(0,  1,  1),
+            new Vector3(0,  1, 0),
         },
         // Bottom face
         new Vector3[]
         {
-            new Vector3( 0.5f, -0.5f,  0.5f),
-            new Vector3( 0.5f, -0.5f, -0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f),
-            new Vector3(-0.5f, -0.5f,  0.5f),
+            new Vector3( 1, 0,  1),
+            new Vector3( 1, 0, 0),
+            new Vector3(0, 0, 0),
+            new Vector3(0, 0,  1),
         },
         // Left face
         new Vector3[]
         {
-            new Vector3(-0.5f,  0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f,  0.5f),
-            new Vector3(-0.5f, -0.5f, -0.5f),
-            new Vector3(-0.5f,  0.5f, -0.5f),
+            new Vector3(0,  1,  1),
+            new Vector3(0, 0,  1),
+            new Vector3(0, 0, 0),
+            new Vector3(0,  1, 0),
         },
         // Right face
         new Vector3[]
         {
-            new Vector3(0.5f,  0.5f, -0.5f),
-            new Vector3(0.5f, -0.5f, -0.5f),
-            new Vector3(0.5f, -0.5f,  0.5f),
-            new Vector3(0.5f,  0.5f,  0.5f),
+            new Vector3(1,  1, 0),
+            new Vector3(1, 0, 0),
+            new Vector3(1, 0,  1),
+            new Vector3(1,  1,  1),
         }
     };
     
@@ -107,39 +107,39 @@ public class Cube
         return new VertexPositionTexture[]
         {
             // Front face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
+            new VertexPositionTexture(new Vector3(0,  1,  1), new Vector2(0.25f, third)),
+            new VertexPositionTexture(new Vector3( 1,  1,  1), new Vector2(1, third)),
+            new VertexPositionTexture(new Vector3( 1, 0,  1), new Vector2(1, third * 2)),
+            new VertexPositionTexture(new Vector3(0, 0,  1), new Vector2(0.25f, third * 2)),
             
             // Back face
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(1.0f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.75f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.75f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(1.0f, third)),
+            new VertexPositionTexture(new Vector3(0, 0, 0), new Vector2(1.0f, third * 2)),
+            new VertexPositionTexture(new Vector3( 1, 0, 0), new Vector2(0.75f, third * 2)),
+            new VertexPositionTexture(new Vector3( 1,  1, 0), new Vector2(0.75f, third)),
+            new VertexPositionTexture(new Vector3(0,  1, 0), new Vector2(1.0f, third)),
             // Top face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.25f, 0.0f)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f, -0.5f), new Vector2(0.5f, 0.0f)),
-            new VertexPositionTexture(new Vector3( 0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
+            new VertexPositionTexture(new Vector3(0,  1, 0), new Vector2(0.25f, 0.0f)),
+            new VertexPositionTexture(new Vector3( 1,  1, 0), new Vector2(1, 0.0f)),
+            new VertexPositionTexture(new Vector3( 1,  1,  1), new Vector2(1, third)),
+            new VertexPositionTexture(new Vector3(0,  1,  1), new Vector2(0.25f, third)),
             
             // Bottom face
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2)),
-            new VertexPositionTexture(new Vector3( 0.5f, -0.5f, -0.5f), new Vector2(0.5f, third * 3)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.25f, third * 3)),
+            new VertexPositionTexture(new Vector3(0, 0,  1), new Vector2(0.25f, third * 2)),
+            new VertexPositionTexture(new Vector3( 1, 0,  1), new Vector2(1, third * 2)),
+            new VertexPositionTexture(new Vector3( 1, 0, 0), new Vector2(1, third * 3)),
+            new VertexPositionTexture(new Vector3(0, 0, 0), new Vector2(0.25f, third * 3)),
             
             // Left face
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f, -0.5f), new Vector2(0.0f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f,  0.5f,  0.5f), new Vector2(0.25f, third)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f,  0.5f), new Vector2(0.25f, third * 2)),
-            new VertexPositionTexture(new Vector3(-0.5f, -0.5f, -0.5f), new Vector2(0.0f, third * 2)),
+            new VertexPositionTexture(new Vector3(0,  1, 0), new Vector2(0.0f, third)),
+            new VertexPositionTexture(new Vector3(0,  1,  1), new Vector2(0.25f, third)),
+            new VertexPositionTexture(new Vector3(0, 0,  1), new Vector2(0.25f, third * 2)),
+            new VertexPositionTexture(new Vector3(0, 0, 0), new Vector2(0.0f, third * 2)),
             
             // Right face
-            new VertexPositionTexture(new Vector3(0.5f,  0.5f,  0.5f), new Vector2(0.5f, third)),
-            new VertexPositionTexture(new Vector3(0.5f,  0.5f, -0.5f), new Vector2(0.75f, third)),
-            new VertexPositionTexture(new Vector3(0.5f, -0.5f, -0.5f), new Vector2(0.75f, third * 2)),
-            new VertexPositionTexture(new Vector3(0.5f, -0.5f,  0.5f), new Vector2(0.5f, third * 2))
+            new VertexPositionTexture(new Vector3(1,  1,  1), new Vector2(1, third)),
+            new VertexPositionTexture(new Vector3(1,  1, 0), new Vector2(0.75f, third)),
+            new VertexPositionTexture(new Vector3(1, 0, 0), new Vector2(0.75f, third * 2)),
+            new VertexPositionTexture(new Vector3(1, 0,  1), new Vector2(1, third * 2))
         };
     }
 

@@ -4,6 +4,7 @@ using ProjectM.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectM.Core.Collisions;
 using ProjectM.Utils;
 
 
@@ -51,7 +52,9 @@ public class Player
     public void Update(GameTime gameTime, World.World world)
     {
         var velocity = Velocity;
-        // velocity.Y -= Gravity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        float gravitationalForce = 5f * Gravity;
+        velocity.Y -= gravitationalForce * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
         Velocity = velocity;        
         
         HandleInput(gameTime);   
@@ -100,33 +103,34 @@ public class Player
 
         // Check collision on Y-axis
         Vector3 bottomPosition = newPosition - new Vector3(0, Size.Y, 0);
-        int blockBelow = world.GetBlocAt(bottomPosition);
-        if (blockBelow != 0)
+        Bloc blocBelow = world.GetBloc(bottomPosition);
+        
+        BBox collisionBox = new BBox(newPosition - Size, newPosition);
+        
+        
+        if (blocBelow != null)
         {
-            correction.Y = Size.Y - (newPosition.Y - (float)Math.Floor(bottomPosition.Y));
-            newPosition.Y = (float)Math.Floor(bottomPosition.Y) + Size.Y;
-            Velocity = Vector3.Zero;
-        }
+            BBox blockBox;
+            Bloc bloc = world.GetBloc(bottomPosition);
+            Console.WriteLine("Bloc type: " + bloc.Type);
+            if (bloc.Type != BlocType.Air && bloc.CheckCollision(collisionBox, out blockBox))
+            {
+                
+                Console.WriteLine("Collision with block below: " + blocBelow);
+                correction.Y = blockBox.Max.Y - collisionBox.Min.Y;
+                // correction.X = blockBox.Max.X - collisionBox.Min.X;
+                // correction.Z = blockBox.Max.Z - collisionBox.Min.Z;
+                newPosition.Y += correction.Y;
+                // newPosition.X += correction.X;
+                // newPosition.Z += correction.Z;
+                Velocity = Vector3.Zero;
+                
+                
+            }
+            
 
-        // // Check collision on X-axis
-        // Vector3 xPosition = new Vector3(newPosition.X, Position.Y, Position.Z);
-        // int blockX = world.GetBlockAt(xPosition);
-        // if (blockX != 0)
-        // {
-        //     correction.X = Position.X - (float)Math.Floor(xPosition.X);
-        //     newPosition.X = Position.X; // Prevent movement through the block
-        //     Velocity = Vector3.Zero;
-        // }
-        //
-        // // Check collision on Z-axis
-        // Vector3 zPosition = new Vector3(Position.X, Position.Y, newPosition.Z);
-        // int blockZ = world.GetBlockAt(zPosition);
-        // if (blockZ != 0)
-        // {
-        //     correction.Z = Position.Z - (float)Math.Floor(zPosition.Z);
-        //     newPosition.Z = Position.Z; // Prevent movement through the block
-        //     Velocity = Vector3.Zero;
-        // }
+        }
+        
 
         Position = newPosition;
         return correction;

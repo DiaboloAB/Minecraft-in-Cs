@@ -137,7 +137,6 @@ public class World
     
     public Chunk GetChunk(Vector3 position)
     {
-        
         return Chunks[(
             (int)position.X / Chunk.SIZE - (position.X < 0 ? 1 : 0),
             (int)position.Z / Chunk.SIZE  - (position.Z < 0 ? 1 : 0)
@@ -149,17 +148,10 @@ public class World
         return new Vector3(((int)position.X / Chunk.SIZE)  - (position.X < 0 ? 1 : 0), 0, ((int)position.Z / Chunk.SIZE)  - (position.Z < 0 ? 1 : 0));
     }
     
-    public int GetBlock(int x, int y, int z)
-    {
-        int chunkX = x / Chunk.SIZE;
-        int chunkZ = z / Chunk.SIZE;
-        return Chunks[(chunkX, chunkZ)].GetBlock(new Vector3(x % Chunk.SIZE, y, z % Chunk.SIZE));
-    }
-    
-    public int GetBlocAt(Vector3 pos)
+    public Bloc GetBloc(Vector3 pos)
     {
         Chunk chunk = GetChunk(pos);
-        return chunk.GetBlockAt(pos);
+        return chunk.GetBloc(pos);
     }
     
     public void SetBloc(int x, int y, int z, int type)

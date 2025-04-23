@@ -26,6 +26,7 @@ public class Game1 : Game
     private Texture2D defaultTexture;
     private Texture2D texture;
     private Texture2D texture2;
+    private Boolean displayChunkBorder = false;
     
     // private CubeRenderer cubeRenderer;
     // private FaceRenderer faceRenderer;
@@ -195,6 +196,11 @@ public class Game1 : Game
         // faceRenderer.UpdateViewProjection(camera);
         renderer.UpdateViewProjection(player.Camera);
         chunkMeshBuilder.UpdateViewProjection(player.Camera);
+        if (Input.IsKeyDown(Keys.LeftControl) && Input.IsKeyPressed(Keys.H))
+        {
+            displayChunkBorder = !displayChunkBorder;
+            Console.WriteLine("Display chunk border: " + displayChunkBorder);
+        }
         
         if (keyboardState.IsKeyDown(Keys.F1) && !debugSwitch)
         {
@@ -219,7 +225,8 @@ public class Game1 : Game
         player.Draw();
         Vector3 camRotation = player.Camera.Rotation;
         orientationGraph.DrawOrientationGraph(player.Camera);
-        chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
+        if (displayChunkBorder)
+            chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
         
         spriteBatch.Begin();
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
