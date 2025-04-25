@@ -16,7 +16,7 @@ public class Bloc
     private Chunk chunk;
     public Vector3 WorldPosition => MatrixPosition + chunk.WorldPosition;
     
-    private static readonly BBox SharedCollisionBox = new BBox(Vector3.Zero, Vector3.One);
+    private static readonly Collider collider = new Collider(Vector3.Zero, Vector3.One);
     
     public Bloc(Vector3 matrixPosition, Chunk chunk, BlocType type)
     {
@@ -27,15 +27,9 @@ public class Bloc
 
     protected BlocModel Model { get; set; }
     
-    public bool CheckCollision(BBox other, out BBox intersectionBox)
+    public Collider getCollider()
     {
-        Console.WriteLine($"Checking collision at world position: {WorldPosition}");
-        return SharedCollisionBox.Intersects(other, WorldPosition, out intersectionBox);
-    }
-
-    public bool CheckCollision(Vector3 point)
-    {
-        return SharedCollisionBox.Contains(point, WorldPosition);
+        return collider + WorldPosition;
     }
 }
 

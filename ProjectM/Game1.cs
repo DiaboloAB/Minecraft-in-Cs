@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using ProjectM.Core.Player;
 using ProjectM.Core.World;
 using ProjectM.Graphics;
@@ -10,6 +11,8 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using ProjectM.Core;
+using BlocModel = ProjectM.Graphics.BlocModel;
 
 
 namespace ProjectM;
@@ -168,7 +171,14 @@ public class Game1 : Game
         if (Input.IsKeyPressed(Keys.H))
         {
             Vector3 pos = player.GetPosition();
-            world.SetBloc((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
+            world.SetBloc(0,60,0, 3);
+            Bloc bloc = world.GetBloc(Vector3.Zero);
+            if (bloc != null)
+                Console.WriteLine("Min: "+ bloc.getCollider().Min +" Max: " + bloc.getCollider().Max);
+            else
+                Console.WriteLine("Bloc is null");
+            
+            // world.SetBloc((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
         }
         
         world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 4);
@@ -228,12 +238,13 @@ public class Game1 : Game
         if (displayChunkBorder)
             chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
         
+
+        
         spriteBatch.Begin();
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {(int) player.Camera.Position.X}, {(int) player.Camera.Position.Y}, {(int) player.Camera.Position.Z}", new Vector2(10, 50), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {player.Position.X}, {player.Position.Y}, {player.Position.Z}", new Vector2(10, 50), Color.White);
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "moveSpeed: " + player.moveSpeed, new Vector2(10, 90), Color.White);
         //chunk pos
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.GetPosition())}", new Vector2(10, 110), Color.White);
         

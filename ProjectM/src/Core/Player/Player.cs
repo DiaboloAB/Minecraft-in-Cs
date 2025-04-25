@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Mail;
 using ProjectM.Core.World;
 using ProjectM.Graphics;
 using Microsoft.Xna.Framework;
@@ -12,14 +15,14 @@ namespace ProjectM.Core.Player;
 
 public class Player
 {
-    public float moveSpeed = 25f;
-    
-    public Vector3 Position { get; set; }
-    public Vector3 Velocity { get; set; }
+    public Vector3 Position = new Vector3(10, 60, 10);
+    public Vector3 Velocity = new Vector3(0, 0, 0);
     public Vector3 Rotation { get; set; }
 
     private const float Gravity = 9.8f;
     private const float JumpForce = 5f;
+    
+    private const float Speed = 25f;
     
     public Vector3 Size { get; set; }
     public Vector3 DiameterSize { get; set; }
@@ -35,11 +38,12 @@ public class Player
     
     TmpPlayerRenderer tmpPlayerRenderer;
     
+    Collider playerCollider;
+    
     public Player(GraphicsDevice graphicsDevice)
     {
         Camera = new Camera(graphicsDevice);
         
-        Position = new Vector3(0, 75, 0);
         Size = new Vector3(0.5f, 1.8f, 0.5f);
         
         Camera.Position = Position;
@@ -51,89 +55,127 @@ public class Player
     
     public void Update(GameTime gameTime, World.World world)
     {
-        var velocity = Velocity;
-        float gravitationalForce = 5f * Gravity;
-        velocity.Y -= gravitationalForce * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-        Velocity = velocity;        
+        // var velocity = Velocity;
+        // float gravitationalForce = 5f * Gravity;
+        // velocity.Y -= gravitationalForce * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        //
+        // Velocity = velocity;        
         
-        HandleInput(gameTime);   
+        HandleInput(gameTime);
         
-        Vector3 newPosition = Position + Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        playerCollider = new Collider(
+            Position - Size / 2,
+            Position + Size / 2
+        );
         
-        Vector3 correction = HandleCollisions(newPosition, world);
+        HandleCollisions(gameTime, world);
         
+        Position += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
         
-
-        if (correction != Vector3.Zero)
-        {
-            Velocity = Vector3.Zero;
-        }
-
-
-
-        // if (cameraMode == CameraMode.FirstPerson)
-        // {
-        //     Camera.Position = Position + new Vector3(0, 1.5f, 0);
-        // }
         Camera.SetRotation(Rotation);
         
         if (cameraMode == CameraMode.FirstPerson)
-        {
             Camera.SetPosition(Position);
-        }
         else
         {
-            //minecraft like third person camera
-            // camera 3meter behind the player base camera, fixing the player head
             Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, 0);
             Vector3 rotatedOffset = Vector3.Transform(new Vector3(0, 0, -5), rotationMatrix);
             Camera.SetPosition(
                 Position - rotatedOffset
             );
-                
-
         }
-
     }
 
-    private Vector3 HandleCollisions(Vector3 newPosition, World.World world)
+    private void HandleCollisions(GameTime gameTime, World.World world)
     {
-        Vector3 correction = Vector3.Zero;
-
-        // Check collision on Y-axis
-        Vector3 bottomPosition = newPosition - new Vector3(0, Size.Y, 0);
-        Bloc blocBelow = world.GetBloc(bottomPosition);
-        
-        BBox collisionBox = new BBox(newPosition - Size, newPosition);
-        
-        
-        if (blocBelow != null)
+        // thx to https://www.youtube.com/watch?v=fWkbIOna6RA&t=3s
+        for (int idx = 0; idx < 3; idx++)
         {
-            BBox blockBox;
-            Bloc bloc = world.GetBloc(bottomPosition);
-            Console.WriteLine("Bloc type: " + bloc.Type);
-            if (bloc.Type != BlocType.Air && bloc.CheckCollision(collisionBox, out blockBox))
+            Vector3 computedVelo =  Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            int stepX = computedVelo.X > 0 ? 1 : -1;
+            int stepY = computedVelo.Y > 0 ? 1 : -1;
+            int stepZ = computedVelo.Z > 0 ? 1 : -1;
+            
+            int stepsXz = (int)(Size.X + 1);
+            int stepsY = (int)Size.Y + 1;
+            
+            List<Tuple<float, Vector3>> potentialCollisions = new List<Tuple<float, Vector3>>();
+
+            Vector3 pos = new Vector3((int)Position.X, (int)Position.Y, (int)Position.Z);
+            
+            Vector3 newPos = new Vector3(
+                (int)(Position.X + computedVelo.X),
+                (int)(Position.Y + computedVelo.Y),
+                (int)(Position.Z + computedVelo.Z)
+            );
+
+            for (int i = (int)pos.X - stepX * (stepsXz + 1); i != (int)newPos.X + stepX * (stepsXz + 2); i += stepX)
             {
+                for (int j = (int)pos.Y - stepY * (stepsY + 1); j != (int)newPos.Y + stepY * (stepsY + 2); j += stepY)
+                {
+                    for (int k = (int)pos.Z - stepZ * (stepsXz + 1); k != (int)newPos.Z + stepZ * (stepsXz + 2); k += stepZ)
+                    {
+                        Bloc bloc = world.GetBloc(new Vector3(i, j, k));
+                        
+                        if (bloc == null)
+                            continue;
+                        if (bloc.Type == BlocType.Air)
+                            continue;
+                        var (entryTime, normal) = playerCollider.Collide(bloc.getCollider(), computedVelo);
+                        if (entryTime < 1f && normal.HasValue)
+                        {
+                            Console.WriteLine("Collision detected with bloc " + bloc.Type);
+                            potentialCollisions.Add(new Tuple<float, Vector3>(entryTime, normal.Value));
+                        }
+            
+                    }
+                }
+            }
+
+            if (potentialCollisions.Count != 0)
+            {
+                var entryTime = float.MaxValue;
+                var normal = new Vector3(0, 0, 0);
+             
+                for (int i = 0; i < potentialCollisions.Count; i++)
+                {
+                    if (potentialCollisions[i].Item1 < entryTime)
+                    {
+                        entryTime = potentialCollisions[i].Item1;
+                        normal = potentialCollisions[i].Item2;
+                    }
+                }
                 
-                Console.WriteLine("Collision with block below: " + blocBelow);
-                correction.Y = blockBox.Max.Y - collisionBox.Min.Y;
-                // correction.X = blockBox.Max.X - collisionBox.Min.X;
-                // correction.Z = blockBox.Max.Z - collisionBox.Min.Z;
-                newPosition.Y += correction.Y;
-                // newPosition.X += correction.X;
-                // newPosition.Z += correction.Z;
-                Velocity = Vector3.Zero;
+                entryTime -= 0.01f;
+                
+                if (normal.X != 0)
+                {
+                    Velocity.X = 0;
+                    Position.X += computedVelo.X * entryTime;
+                }
+
+                if (normal.Y != 0)
+                {
+                    Velocity.Y = 0;
+                    Position.Y += computedVelo.Y * entryTime;
+                }
+
+                if (normal.Z != 0)
+                {
+                    Velocity.Z = 0;
+                    Position.Z += computedVelo.Z * entryTime;
+                }
+
+                // if (normal.Y == 1)
+                // {
+                //     Grounded = true;
+                // }
                 
                 
             }
-            
-
         }
-        
 
-        Position = newPosition;
-        return correction;
     }
 
     private void HandleInput(GameTime gameTime)
@@ -143,10 +185,6 @@ public class Player
         var mouseState = Mouse.GetState();
         
         Vector3 move = new Vector3(0, 0, 0);
-        
-        float targetSpeed = moveSpeed + (mouseState.ScrollWheelValue - previousScrollValue);
-        moveSpeed = MathHelper.Lerp(moveSpeed, targetSpeed, 0.1f); // Adjust 0.1f for smoothness
-        previousScrollValue = mouseState.ScrollWheelValue;
             
         // cameraMode = CameraMode.FirstPerson;
         if (Input.IsKeyPressed(Keys.F5))
@@ -159,24 +197,24 @@ public class Player
         
         
         if (keyboardState.IsKeyDown(Keys.Z))
-            move.Z += moveSpeed;
+            move.Z += Speed;
         if (keyboardState.IsKeyDown(Keys.S))
-            move.Z -= moveSpeed;
+            move.Z -= Speed;
         if (keyboardState.IsKeyDown(Keys.Q))
-            move.X += moveSpeed;
+            move.X += Speed;
         if (keyboardState.IsKeyDown(Keys.D))
-            move.X -= moveSpeed;
+            move.X -= Speed;
         if (keyboardState.IsKeyDown(Keys.Space))
-            move.Y += moveSpeed;
+            move.Y += Speed;
         if (keyboardState.IsKeyDown(Keys.LeftShift))
-            move.Y -= moveSpeed;
+            move.Y -= Speed;
         
-        move *= (float)gameTime.ElapsedGameTime.TotalSeconds;
+        move *=  Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
         
         Vector3 forwardNoPitch = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Camera.Rotation.Y));
         forwardNoPitch = Vector3.Normalize(forwardNoPitch);
 
-        Position += new Vector3(
+        Velocity = new Vector3(
             forwardNoPitch.X * move.Z + forwardNoPitch.Z * move.X,
             move.Y,
             forwardNoPitch.Z * move.Z - forwardNoPitch.X * move.X
@@ -189,7 +227,6 @@ public class Player
                 * (float)gameTime.ElapsedGameTime.TotalSeconds
                 );
         
-        // lastMousePosition = new Vector2(mouseState.X, mouseState.Y);
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
     }
     
@@ -235,7 +272,7 @@ public class Player
         if (cameraMode != CameraMode.FirstPerson)
         {
             tmpPlayerRenderer.Draw(
-                Position,
+                Position + new Vector3(-Size.X / 2, Size.Y / 2, -Size.Z / 2),
                 Size
             );
         }
