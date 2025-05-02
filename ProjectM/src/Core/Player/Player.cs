@@ -13,20 +13,20 @@ using ProjectM.Utils;
 
 namespace ProjectM.Core.Player;
 
-public class Player
+public class Player : Entity
 {
-    public Vector3 Position = new Vector3(10, 60, 10);
-    public Vector3 Velocity = new Vector3(0, 0, 0);
+    private float WALKING_SPEED = 2.317f;
+    private float SPRINTING_SPEED = 3f;
+    private Vector3 InputDirection;
+    float rotationSpeed = 0.4f;
+    
+    float targetFov = 90f;
+    
     public Vector3 Rotation { get; set; }
 
-    private const float Gravity = 9.8f;
-    private const float JumpForce = 5f;
-    
-    private const float Speed = 25f;
-    
-    public Vector3 Size { get; set; }
-    public Vector3 DiameterSize { get; set; }
-    // private const float Friction = 0.1f
+    private float TargetSpeed;
+    private float Speed;
+    private bool Sprinting;
     
     private int previousScrollValue;
 
@@ -38,9 +38,8 @@ public class Player
     
     TmpPlayerRenderer tmpPlayerRenderer;
     
-    Collider playerCollider;
-    
-    public Player(GraphicsDevice graphicsDevice)
+    public Player(GraphicsDevice graphicsDevice) 
+        : base(new Vector3(0, 60, 0), new Vector3(0.5f, 1.8f, 0.5f))
     {
         Camera = new Camera(graphicsDevice);
         
@@ -51,140 +50,68 @@ public class Player
         Mouse.SetPosition((int)lastMousePosition.X, (int)lastMousePosition.Y);
         
         tmpPlayerRenderer = new TmpPlayerRenderer(graphicsDevice);
+        
+        TargetSpeed = WALKING_SPEED;
+        Speed = TargetSpeed;
     }
     
     public void Update(GameTime gameTime, World.World world)
     {
-        // var velocity = Velocity;
-        // float gravitationalForce = 5f * Gravity;
-        // velocity.Y -= gravitationalForce * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        //
-        // Velocity = velocity;        
-        
         HandleInput(gameTime);
         
-        playerCollider = new Collider(
-            Position - Size / 2,
-            Position + Size / 2
-        );
+        if ((float)gameTime.ElapsedGameTime.TotalSeconds * 20 > 1)
+            Speed = TargetSpeed;
+        else 
+            Speed += (TargetSpeed - Speed) * (float)gameTime.ElapsedGameTime.TotalSeconds * 20;
+        float multiplier = Speed * (Flying ? 2 : 1);
+
+        if (Flying && InputDirection.Y != 0)
+            Acceleration.Y = InputDirection.Y * multiplier;
         
-        HandleCollisions(gameTime, world);
+        if (InputDirection.X != 0 || InputDirection.Z != 0)
+        {
+            Vector3 forwardNoPitch = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Camera.Rotation.Y));
+            forwardNoPitch = Vector3.Normalize(forwardNoPitch);
+            
+            Acceleration = new Vector3(
+                forwardNoPitch.X * InputDirection.Z + forwardNoPitch.Z * InputDirection.X,
+                Acceleration.Y,
+                forwardNoPitch.Z * InputDirection.Z - forwardNoPitch.X * InputDirection.X
+            );
+            Acceleration *= multiplier;
+        }
+
+        if (InputDirection.Y > 0 && !Flying && Grounded)
+        {
+            Jump();
+        }
         
-        Position += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+        base.Update(gameTime, world);       
+        // Position += Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
         
+        
+        
+        // cam update
+        targetFov = Sprinting ? 100f : 90f;
+        Camera.SetFov(MathHelper.Lerp(Camera.FieldOfView, targetFov, 0.2f));
         Camera.SetRotation(Rotation);
-        
         if (cameraMode == CameraMode.FirstPerson)
-            Camera.SetPosition(Position);
+            Camera.SetPosition(Position + new Vector3(0, Size.Y / 2 - 0.2f, 0));
         else
         {
             Matrix rotationMatrix = Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, 0);
             Vector3 rotatedOffset = Vector3.Transform(new Vector3(0, 0, -5), rotationMatrix);
             Camera.SetPosition(
-                Position - rotatedOffset
+                Position + new Vector3(0, Size.Y / 2 - 0.2f, 0) - rotatedOffset
             );
         }
-    }
-
-    private void HandleCollisions(GameTime gameTime, World.World world)
-    {
-        // thx to https://www.youtube.com/watch?v=fWkbIOna6RA&t=3s
-        for (int idx = 0; idx < 3; idx++)
-        {
-            Vector3 computedVelo =  Velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            int stepX = computedVelo.X > 0 ? 1 : -1;
-            int stepY = computedVelo.Y > 0 ? 1 : -1;
-            int stepZ = computedVelo.Z > 0 ? 1 : -1;
-            
-            int stepsXz = (int)(Size.X + 1);
-            int stepsY = (int)Size.Y + 1;
-            
-            List<Tuple<float, Vector3>> potentialCollisions = new List<Tuple<float, Vector3>>();
-
-            Vector3 pos = new Vector3((int)Position.X, (int)Position.Y, (int)Position.Z);
-            
-            Vector3 newPos = new Vector3(
-                (int)(Position.X + computedVelo.X),
-                (int)(Position.Y + computedVelo.Y),
-                (int)(Position.Z + computedVelo.Z)
-            );
-
-            for (int i = (int)pos.X - stepX * (stepsXz + 1); i != (int)newPos.X + stepX * (stepsXz + 2); i += stepX)
-            {
-                for (int j = (int)pos.Y - stepY * (stepsY + 1); j != (int)newPos.Y + stepY * (stepsY + 2); j += stepY)
-                {
-                    for (int k = (int)pos.Z - stepZ * (stepsXz + 1); k != (int)newPos.Z + stepZ * (stepsXz + 2); k += stepZ)
-                    {
-                        Bloc bloc = world.GetBloc(new Vector3(i, j, k));
-                        
-                        if (bloc == null)
-                            continue;
-                        if (bloc.Type == BlocType.Air)
-                            continue;
-                        var (entryTime, normal) = playerCollider.Collide(bloc.getCollider(), computedVelo);
-                        if (entryTime < 1f && normal.HasValue)
-                        {
-                            Console.WriteLine("Collision detected with bloc " + bloc.Type);
-                            potentialCollisions.Add(new Tuple<float, Vector3>(entryTime, normal.Value));
-                        }
-            
-                    }
-                }
-            }
-
-            if (potentialCollisions.Count != 0)
-            {
-                var entryTime = float.MaxValue;
-                var normal = new Vector3(0, 0, 0);
-             
-                for (int i = 0; i < potentialCollisions.Count; i++)
-                {
-                    if (potentialCollisions[i].Item1 < entryTime)
-                    {
-                        entryTime = potentialCollisions[i].Item1;
-                        normal = potentialCollisions[i].Item2;
-                    }
-                }
-                
-                entryTime -= 0.01f;
-                
-                if (normal.X != 0)
-                {
-                    Velocity.X = 0;
-                    Position.X += computedVelo.X * entryTime;
-                }
-
-                if (normal.Y != 0)
-                {
-                    Velocity.Y = 0;
-                    Position.Y += computedVelo.Y * entryTime;
-                }
-
-                if (normal.Z != 0)
-                {
-                    Velocity.Z = 0;
-                    Position.Z += computedVelo.Z * entryTime;
-                }
-
-                // if (normal.Y == 1)
-                // {
-                //     Grounded = true;
-                // }
-                
-                
-            }
-        }
-
     }
 
     private void HandleInput(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
-        float rotationSpeed = 0.4f;
         var mouseState = Mouse.GetState();
-        
-        Vector3 move = new Vector3(0, 0, 0);
+        InputDirection = Vector3.Zero;
             
         // cameraMode = CameraMode.FirstPerson;
         if (Input.IsKeyPressed(Keys.F5))
@@ -197,28 +124,33 @@ public class Player
         
         
         if (keyboardState.IsKeyDown(Keys.Z))
-            move.Z += Speed;
+            InputDirection.Z += Speed;
         if (keyboardState.IsKeyDown(Keys.S))
-            move.Z -= Speed;
+            InputDirection.Z -= Speed;
         if (keyboardState.IsKeyDown(Keys.Q))
-            move.X += Speed;
+            InputDirection.X += Speed;
         if (keyboardState.IsKeyDown(Keys.D))
-            move.X -= Speed;
+            InputDirection.X -= Speed;
         if (keyboardState.IsKeyDown(Keys.Space))
-            move.Y += Speed;
-        if (keyboardState.IsKeyDown(Keys.LeftShift))
-            move.Y -= Speed;
-        
-        move *=  Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
-        
-        Vector3 forwardNoPitch = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Camera.Rotation.Y));
-        forwardNoPitch = Vector3.Normalize(forwardNoPitch);
+            InputDirection.Y += Speed;
+        if (keyboardState.IsKeyDown(Keys.F))
+            InputDirection.Y -= Speed;
 
-        Velocity = new Vector3(
-            forwardNoPitch.X * move.Z + forwardNoPitch.Z * move.X,
-            move.Y,
-            forwardNoPitch.Z * move.Z - forwardNoPitch.X * move.X
-        );
+        if (keyboardState.IsKeyDown(Keys.LeftShift))
+        {
+            TargetSpeed = SPRINTING_SPEED;
+            Sprinting = true;
+        }
+        else
+        {
+            TargetSpeed = WALKING_SPEED;
+            Sprinting = false;
+        }
+
+        if (Input.IsKeyPressed(Keys.F7))
+        {
+            Flying = !Flying;
+        }
         
         Vector2 mouseDelta = new Vector2(mouseState.X, mouseState.Y) - lastMousePosition;
         if ( mouseDelta != Vector2.Zero)
@@ -259,11 +191,6 @@ public class Player
         }
         
         return Rotation;
-    }
-    
-    public Vector3 GetPosition()
-    {
-        return Position;
     }
     
     public void Draw()

@@ -170,7 +170,7 @@ public class Game1 : Game
 
         if (Input.IsKeyPressed(Keys.H))
         {
-            Vector3 pos = player.GetPosition();
+            Vector3 pos = player.Position;
             world.SetBloc(0,60,0, 3);
             Bloc bloc = world.GetBloc(Vector3.Zero);
             if (bloc != null)
@@ -181,8 +181,8 @@ public class Game1 : Game
             // world.SetBloc((int)pos.X, (int)(pos.Y - 1.8), (int)pos.Z, 3);
         }
         
-        world.GenerateChunks(world.GetChunkPosition(player.GetPosition()), 4);
-        world.CreateChunksBuffers(player.GetPosition(), 4);
+        world.GenerateChunks(world.GetChunkPosition(player.Position), 4);
+        world.CreateChunksBuffers(player.Position, 4);
         
         player.Update(gameTime, world);
         HandleInput(gameTime);
@@ -231,12 +231,12 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.CornflowerBlue);
         
         // cubeRenderer.Draw();
-        renderer.DrawWorld(world, world.GetChunkPosition(player.GetPosition()), 16);
+        renderer.DrawWorld(world, world.GetChunkPosition(player.Position), 16);
         player.Draw();
         Vector3 camRotation = player.Camera.Rotation;
         orientationGraph.DrawOrientationGraph(player.Camera);
         if (displayChunkBorder)
-            chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.GetPosition()) * 16, (int)player.Position.Y);
+            chunkMeshBuilder.DrawChunkBorderGrid(world.GetChunkPosition(player.Position) * 16, (int)player.Position.Y);
         
 
         
@@ -246,7 +246,7 @@ public class Game1 : Game
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {player.Position.X}, {player.Position.Y}, {player.Position.Z}", new Vector2(10, 50), Color.White);
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
         //chunk pos
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.GetPosition())}", new Vector2(10, 110), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.Position)}", new Vector2(10, 110), Color.White);
         
         spriteBatch.Draw(
             crosshair, 

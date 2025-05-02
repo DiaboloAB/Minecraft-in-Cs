@@ -16,11 +16,14 @@ public class Camera
     public string Facing { get; private set; } = "north";
     public float FieldOfView { get; private set; }
     
+    private GraphicsDevice graphicsDevice;
+    
     public Camera(GraphicsDevice graphicsDevice)
     {
         FieldOfView = 90f;
         Position = new Vector3(0, 0, 5);
         Rotation = new Vector3(0, 0, 0);
+        this.graphicsDevice = graphicsDevice;
         
         Console.WriteLine("Camera created at position " + Position);
         
@@ -32,6 +35,12 @@ public class Camera
     {
         Vector3 target = Position + Vector3.Transform(Vector3.Forward, Matrix.CreateRotationX(Rotation.X) * Matrix.CreateRotationY(Rotation.Y) * Matrix.CreateRotationZ(Rotation.Z));
         View = Matrix.CreateLookAt(Position, target, Vector3.Up);
+    }
+    
+    public void SetFov(float fov)
+    {
+        FieldOfView = fov;
+        UpdateProjectionMatrix(graphicsDevice);
     }
 
     private void UpdateProjectionMatrix(GraphicsDevice graphicsDevice)
