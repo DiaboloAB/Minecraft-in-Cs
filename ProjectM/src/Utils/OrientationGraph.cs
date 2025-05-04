@@ -43,17 +43,17 @@ public class OrientationGraph
         
         Vector3 startPoint = pos + forward * 10;
         
-        Vector3 endPoint = startPoint + Vector3.Forward;
+        Vector3 endPoint = startPoint + Vector3.Backward;
 
         basicEffect.View = camera.View;
         basicEffect.Projection = camera.Projection;
         
         basicEffect.CurrentTechnique.Passes[0].Apply();
-        var vertices = new[] { new VertexPositionColor(startPoint, Color.Red),  new VertexPositionColor(endPoint, Color.Red) };
+        var vertices = new[] { new VertexPositionColor(startPoint, Color.Green),  new VertexPositionColor(endPoint, Color.Green) };
         graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
         
         endPoint = startPoint + Vector3.Right;
-        vertices = new[] { new VertexPositionColor(startPoint, Color.Green),  new VertexPositionColor(endPoint, Color.Green) };
+        vertices = new[] { new VertexPositionColor(startPoint, Color.Red),  new VertexPositionColor(endPoint, Color.Red) };
         graphicsDevice.DrawUserPrimitives(PrimitiveType.LineList, vertices, 0, 1);
         
         endPoint = startPoint + Vector3.Up;

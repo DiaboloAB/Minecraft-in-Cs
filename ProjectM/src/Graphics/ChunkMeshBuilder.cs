@@ -35,18 +35,29 @@ public class ChunkRenderer
         var vertices = new List<VertexPositionColor>();
 
         // Add chunk border vertices
-        // AddChunkBorderVertices(vertices, chunkPosition, height);
-        //
-        // // Add blue grid vertices
-        // AddGridVertices(vertices, chunkPosition, height, Color.Yellow, 2, _chunkSize - 1, 4);
-        //
-        // // Add horizontal lines on the side
-        // AddHorizontalSideLines(vertices, chunkPosition, -100, 100, 4);
+        AddChunkBorderVertices(vertices, chunkPosition, height);
+        
+        // Add blue grid vertices
+        AddGridVertices(vertices, chunkPosition, height, Color.Yellow, 2, _chunkSize - 1, 4);
+        
+        // Add horizontal lines on the side
+        AddHorizontalSideLines(vertices, chunkPosition, -100, 100, 4);
 
         vertices.AddRange(new[]
         {
             CreateVertex(0, height - 50, 0, Color.Blue),
             CreateVertex(0, height + 50, 0, Color.Blue),
+        });
+        
+        vertices.AddRange(new[]
+        {
+            CreateVertex(0, 65, 0, Color.Red),
+            CreateVertex(100, 65, 0, Color.Red),
+        });
+        vertices.AddRange(new[]
+        {
+            CreateVertex(0, 65, 0, Color.Green),
+            CreateVertex(0, 65, 100, Color.Green),
         });
         
         // Draw the lines

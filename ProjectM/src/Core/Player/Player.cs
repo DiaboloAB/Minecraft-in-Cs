@@ -15,14 +15,14 @@ namespace ProjectM.Core.Player;
 
 public class Player : Entity
 {
-    private float WALKING_SPEED = 2.317f;
-    private float SPRINTING_SPEED = 3f;
+    private float WALKING_SPEED = 4.317f;
+    private float SPRINTING_SPEED = 6f;
     private Vector3 InputDirection;
-    float rotationSpeed = 0.4f;
+    float rotationSpeed = 0.20f;
     
     float targetFov = 90f;
     
-    public Vector3 Rotation { get; set; }
+    public Vector3 Rotation = new Vector3(0, -MathHelper.PiOver2, 0);
 
     private float TargetSpeed;
     private float Speed;
@@ -39,7 +39,7 @@ public class Player : Entity
     TmpPlayerRenderer tmpPlayerRenderer;
     
     public Player(GraphicsDevice graphicsDevice) 
-        : base(new Vector3(0, 60, 0), new Vector3(0.5f, 1.8f, 0.5f))
+        : base(new Vector3(16, 60, 16), new Vector3(0.5f, 1.8f, 0.5f))
     {
         Camera = new Camera(graphicsDevice);
         
@@ -72,16 +72,19 @@ public class Player : Entity
         {
             Vector3 forwardNoPitch = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Camera.Rotation.Y));
             forwardNoPitch = Vector3.Normalize(forwardNoPitch);
-            
+
+            Vector3 right = Vector3.Transform(Vector3.Right, Matrix.CreateRotationY(Camera.Rotation.Y));
+            right = Vector3.Normalize(right);
+
             Acceleration = new Vector3(
-                forwardNoPitch.X * InputDirection.Z + forwardNoPitch.Z * InputDirection.X,
-                Acceleration.Y,
-                forwardNoPitch.Z * InputDirection.Z - forwardNoPitch.X * InputDirection.X
+                forwardNoPitch.X * InputDirection.X + right.X * InputDirection.Z,
+                0,
+                forwardNoPitch.Z * InputDirection.X + right.Z * InputDirection.Z
             );
             Acceleration *= multiplier;
         }
 
-        if (InputDirection.Y > 0 && !Flying && Grounded)
+        if (InputDirection.Y > 0 && !Flying)
         {
             Jump();
         }
@@ -124,17 +127,17 @@ public class Player : Entity
         
         
         if (keyboardState.IsKeyDown(Keys.Z))
-            InputDirection.Z += Speed;
-        if (keyboardState.IsKeyDown(Keys.S))
-            InputDirection.Z -= Speed;
+            InputDirection.X = 1;
         if (keyboardState.IsKeyDown(Keys.Q))
-            InputDirection.X += Speed;
+            InputDirection.Z = -1;
+        if (keyboardState.IsKeyDown(Keys.S))
+            InputDirection.X = -1;
         if (keyboardState.IsKeyDown(Keys.D))
-            InputDirection.X -= Speed;
+            InputDirection.Z = 1;
         if (keyboardState.IsKeyDown(Keys.Space))
-            InputDirection.Y += Speed;
+            InputDirection.Y = 1;
         if (keyboardState.IsKeyDown(Keys.F))
-            InputDirection.Y -= Speed;
+            InputDirection.Y = -1;
 
         if (keyboardState.IsKeyDown(Keys.LeftShift))
         {
@@ -165,31 +168,11 @@ public class Player : Entity
     public Vector3 Rotate(Vector3 rotation)
     {
         Rotation += rotation;
-        
-        Vector3 Rotation360 = new Vector3(
-            MathHelper.WrapAngle(Rotation.X),
-            MathHelper.WrapAngle(Rotation.Y),
-            MathHelper.WrapAngle(Rotation.Z)
-        );
-        
-        if (Rotation.Y > Math.PI)
-        {
-            Rotation = new Vector3(Rotation.X, Rotation.Y - MathHelper.TwoPi, Rotation.Z);
-        }
-        else if (Rotation.Y < -Math.PI)
-        {
-            Rotation = new Vector3(Rotation.X, Rotation.Y + MathHelper.TwoPi, Rotation.Z);
-        }
-        
-        if (Rotation360.X > MathHelper.PiOver2 - 0.1f)
-        {
-            Rotation = new Vector3(MathHelper.PiOver2 - 0.1f, Rotation.Y, Rotation.Z);
-        }
-        else if (Rotation360.X < -MathHelper.PiOver2 + 0.1f)
-        {
-            Rotation = new Vector3(-MathHelper.PiOver2 + 0.1f, Rotation.Y, Rotation.Z);
-        }
-        
+
+        Rotation.X = MathHelper.Clamp(Rotation.X, -MathHelper.PiOver2 + 0.1f, MathHelper.PiOver2 - 0.1f);
+
+        Rotation.Y = MathHelper.WrapAngle(Rotation.Y);
+
         return Rotation;
     }
     

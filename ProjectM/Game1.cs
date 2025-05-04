@@ -245,8 +245,10 @@ public class Game1 : Game
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {player.Position.X}, {player.Position.Y}, {player.Position.Z}", new Vector2(10, 50), Color.White);
         spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"bloc:  {MathUtilities.RoundVector3(player.Position)}", new Vector2(10, 90), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"chunkbloc:  {MathUtilities.RoundVector3(player.Position) - world.GetChunk(player.Position).WorldPosition}", new Vector2(10, 110), Color.White);
         //chunk pos
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.Position)}", new Vector2(10, 110), Color.White);
+        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.Position)}", new Vector2(10, 130), Color.White);
         
         spriteBatch.Draw(
             crosshair, 

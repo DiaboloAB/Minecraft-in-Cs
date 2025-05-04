@@ -55,22 +55,17 @@ public class Camera
 
     private void UpdateFacing()
     {
-        if (Rotation.Y > -Math.PI / 4 && Rotation.Y < Math.PI / 4)
-        {
-            Facing = "north";
-        }
-        else if (Rotation.Y > Math.PI / 4 && Rotation.Y < 3 * Math.PI / 4)
-        {
-            Facing = "west";
-        }
-        else if (Rotation.Y < -Math.PI / 4 && Rotation.Y > -3 * Math.PI / 4)
-        {
-            Facing = "east";
-        }
-        else
-        {
-            Facing = "south";
-        }
+        Vector3 forward = Vector3.Transform(Vector3.Forward, Matrix.CreateRotationY(Rotation.Y));
+        Facing = "";
+
+        if (forward.X > 0.5)
+            Facing += "North ";
+        if (forward.X < -0.5)
+            Facing += "South ";
+        if (forward.Z > 0.5)
+            Facing += "East ";
+        if (forward.Z < -0.5)
+            Facing += "West ";
     }
     
     public void SetRotation(Vector3 rotation)

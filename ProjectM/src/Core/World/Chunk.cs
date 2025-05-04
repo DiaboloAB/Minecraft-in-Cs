@@ -162,16 +162,6 @@ public class Chunk
         return blocs[x, y, z];
     }
     
-    public Bloc GetBloc(Vector3 pos)
-    {
-        pos = pos - WorldPosition;
-        if (pos.X < 0 || pos.X >= SIZE || pos.Y < 0 || pos.Y >= HEIGHT || pos.Z < 0 || pos.Z >= SIZE)
-        {
-            return null;
-        }
-        return blocs[(int)pos.X, (int)pos.Y, (int)pos.Z];
-    }
-    
     public void SetBlock(int x, int y, int z, int type)
     {
         blocs[x, y, z].Type = (Core.BlocType)type;
