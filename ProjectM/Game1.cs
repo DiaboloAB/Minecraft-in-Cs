@@ -12,6 +12,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ProjectM.Core;
+using ProjectM.Debug.Tools;
 using BlocModel = ProjectM.Graphics.BlocModel;
 
 
@@ -19,6 +20,7 @@ namespace ProjectM;
 
 public class Game1 : Game
 {
+    private DebugTool debugTool;
     private Player player;
     
     private OrientationGraph orientationGraph;
@@ -35,13 +37,7 @@ public class Game1 : Game
     // private FaceRenderer faceRenderer;
     private Renderer renderer;
     
-    
     private ChunkRenderer chunkMeshBuilder;
-    
-    private double fps = 0;
-    private double fpsTimer = 0;
-    
-    ContentManager content => Content;
     
     Texture2D crosshair;
     
@@ -66,6 +62,8 @@ public class Game1 : Game
     {
         world = new World(467465678, GraphicsDevice);
         player = new Player(GraphicsDevice);
+        debugTool = new DebugTool(world, player, Content);
+
         
         // Effect effect;
         Effect effectbis;
@@ -73,7 +71,7 @@ public class Game1 : Game
         try
         {
             // effect = content.Load<Effect>("Effects/InstancedEffect");
-            effectbis = content.Load<Effect>("Effects/FaceEffect");
+            effectbis = Content.Load<Effect>("Effects/FaceEffect");
             vertexEffect = Content.Load<Effect>("Effects/VertexEffect");
             Console.WriteLine("All Effects loaded successfully.");
         }
@@ -81,18 +79,18 @@ public class Game1 : Game
         {
             throw new ContentLoadException("Failed to load 1 Effect. Make sure the .fx file is properly added to the Content project.", e);
         }
-        texture = content.Load<Texture2D>("Textures/Grass");
-        texture2 = content.Load<Texture2D>("Textures/Stone");
+        texture = Content.Load<Texture2D>("Textures/Grass");
+        texture2 = Content.Load<Texture2D>("Textures/Stone");
 
         Dictionary<string, Texture2D> textureDic = new Dictionary<string, Texture2D>();
-        defaultTexture = content.Load<Texture2D>("Textures/Default");
-        crosshair = content.Load<Texture2D>("Textures/Crosshair");
+        defaultTexture = Content.Load<Texture2D>("Textures/Default");
+        crosshair = Content.Load<Texture2D>("Textures/Crosshair");
         textureDic.Add("grass", texture);
         textureDic.Add("stone", texture2);
         textureDic.Add("default", defaultTexture);
-        textureDic.Add("chest", content.Load<Texture2D>("Textures/Chest"));
-        textureDic.Add("crosshair", content.Load<Texture2D>("Textures/Crosshair"));
-        textureDic.Add("leaves", content.Load<Texture2D>("Textures/Leaves"));
+        textureDic.Add("chest", Content.Load<Texture2D>("Textures/Chest"));
+        textureDic.Add("crosshair", Content.Load<Texture2D>("Textures/Crosshair"));
+        textureDic.Add("leaves", Content.Load<Texture2D>("Textures/Leaves"));
         textureDic.Add("wood", Content.Load<Texture2D>("textures/Wood"));
         
         atlas = new Atlas(GraphicsDevice, new Vector2(2048, 2048), textureDic);
@@ -118,16 +116,15 @@ public class Game1 : Game
         // CreateTestCubes();
         // CreateTestChests();
         CreateFaces();
-        
         base.Initialize();
     }
     
     private void CreateTestChests()
     {
-        BlocModel model = BlocModel.LoadModel(content, "Chest", GraphicsDevice);
+        BlocModel model = BlocModel.LoadModel(Content, "Chest", GraphicsDevice);
         model.PrintModel();
         
-        Texture2D texture = content.Load<Texture2D>("Textures/Chest");
+        Texture2D texture = Content.Load<Texture2D>("Textures/Chest");
         
         List<CubeData> cubes;
         cubes = new List<CubeData>();
@@ -186,15 +183,8 @@ public class Game1 : Game
         
         player.Update(gameTime, world);
         HandleInput(gameTime);
-
-
-        fpsTimer += gameTime.ElapsedGameTime.TotalSeconds;
-        if (fpsTimer > 0.5f)
-        {
-            fps = 1 / gameTime.ElapsedGameTime.TotalSeconds;
-            fpsTimer = 0;
-        }
-
+        
+        debugTool.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
         base.Update(gameTime);
     }
     
@@ -241,14 +231,7 @@ public class Game1 : Game
 
         
         spriteBatch.Begin();
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"FPS: {(int)fps}", new Vector2(10, 10), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Facing: {player.Camera.Facing}", new Vector2(10, 30), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Position:  {player.Position.X}, {player.Position.Y}, {player.Position.Z}", new Vector2(10, 50), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), "Rotation: " + camRotation, new Vector2(10, 70), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"bloc:  {MathUtilities.RoundVector3(player.Position)}", new Vector2(10, 90), Color.White);
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"chunkbloc:  {MathUtilities.RoundVector3(player.Position) - world.GetChunk(player.Position).WorldPosition}", new Vector2(10, 110), Color.White);
-        //chunk pos
-        spriteBatch.DrawString(Content.Load<SpriteFont>("Fonts/File"), $"Chunk: {world.GetChunkPosition(player.Position)}", new Vector2(10, 130), Color.White);
+        debugTool.Draw(spriteBatch);
         
         spriteBatch.Draw(
             crosshair, 
